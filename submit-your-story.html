@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Your Story — to truly live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F5F0E8;
+    --warm-white: #FAF7F2;
+    --sand: #E8DFD0;
+    --clay: #C4A882;
+    --brown: #5C4A3A;
+    --deep: #2C1F14;
+    --olive: #8A8A6E;
+    --muted: #9C8C7C;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Jost', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--warm-white); color: var(--deep);
+    font-family: var(--sans); font-weight: 300;
+    overflow-x: hidden; min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem 3rem;
+    background: rgba(250,247,242,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid rgba(92,74,58,0.1);
+    transition: padding 0.4s ease;
+  }
+  .nav-logo {
+    font-family: var(--serif); font-size: 1.1rem; font-weight: 400;
+    letter-spacing: 0.18em; text-transform: lowercase; color: var(--deep); text-decoration: none;
+  }
+  .nav-back {
+    font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted); text-decoration: none;
+    transition: color 0.3s; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .nav-back::before { content: '←'; }
+  .nav-back:hover { color: var(--deep); }
+
+  /* PAGE HEADER */
+  .page-header {
+    padding: 10rem 3rem 5rem; background: var(--warm-white);
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 50% 60% at 80% 30%, rgba(196,168,130,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(138,138,110,0.07) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 680px; position: relative; z-index: 1; }
+  .section-label {
+    font-family: var(--sans); font-size: 0.65rem; font-weight: 400;
+    letter-spacing: 0.24em; text-transform: uppercase; color: var(--clay);
+    margin-bottom: 1.5rem; opacity: 0; animation: fadeUp 1s 0.2s forwards;
+  }
+  .page-title {
+    font-family: var(--serif); font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 300; line-height: 1.15; color: var(--deep);
+    opacity: 0; animation: fadeUp 1.1s 0.4s forwards;
+  }
+  .page-title em { font-style: italic; color: var(--brown); }
+  .rule {
+    width: 40px; height: 0.5px; background: var(--clay); margin: 2.5rem 0;
+    opacity: 0; animation: fadeUp 1s 0.55s forwards;
+  }
+  .header-body {
+    font-family: var(--sans); font-size: 0.95rem; font-weight: 300;
+    line-height: 1.9; color: var(--muted); max-width: 500px;
+    opacity: 0; animation: fadeUp 1.1s 0.65s forwards;
+  }
+
+  /* FORM SECTION */
+  .form-section { padding: 4rem 3rem 7rem; background: var(--cream); }
+  .form-inner {
+    max-width: 960px;
+    display: grid; grid-template-columns: 1fr 2fr; gap: 5rem; align-items: start;
+  }
+
+  /* SIDEBAR */
+  .form-sidebar { position: sticky; top: 7rem; }
+  .sidebar-heading {
+    font-family: var(--serif); font-size: 1.5rem; font-weight: 400;
+    color: var(--deep); line-height: 1.4; margin-bottom: 1.5rem;
+  }
+  .sidebar-heading em { font-style: italic; }
+  .sidebar-note {
+    font-family: var(--sans); font-size: 0.82rem; font-weight: 300;
+    line-height: 1.85; color: var(--muted); margin-bottom: 2rem;
+  }
+  .sidebar-promise {
+    border-left: 2px solid var(--clay); padding-left: 1.2rem;
+    font-family: var(--serif); font-size: 0.95rem; font-style: italic;
+    color: var(--brown); line-height: 1.6;
+  }
+  .sidebar-topics { margin-top: 2rem; }
+  .topics-label {
+    font-family: var(--sans); font-size: 0.62rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--clay); margin-bottom: 1rem;
+  }
+  .topic-pill {
+    display: inline-block; font-family: var(--sans); font-size: 0.72rem;
+    font-weight: 300; letter-spacing: 0.08em; color: var(--brown);
+    background: var(--warm-white); border: 0.5px solid rgba(92,74,58,0.2);
+    padding: 0.4rem 0.9rem; margin: 0.3rem 0.3rem 0 0; border-radius: 2px;
+  }
+
+  /* FIELDS */
+  .story-form { display: flex; flex-direction: column; }
+  .field-group {
+    border-bottom: 0.5px solid rgba(92,74,58,0.12);
+    padding: 2rem 0; position: relative;
+  }
+  .field-group:first-child { padding-top: 0; }
+  label {
+    display: block; font-family: var(--sans); font-size: 0.65rem; font-weight: 400;
+    letter-spacing: 0.22em; text-transform: uppercase; color: var(--clay); margin-bottom: 0.75rem;
+  }
+  .label-note {
+    display: block; font-family: var(--sans); font-size: 0.72rem; font-weight: 300;
+    letter-spacing: 0.04em; text-transform: none; color: var(--muted); margin-top: 0.3rem;
+  }
+  input[type="text"], input[type="email"], select, textarea {
+    width: 100%; font-family: var(--sans); font-size: 0.9rem; font-weight: 300;
+    color: var(--deep); background: transparent; border: none; outline: none;
+    padding: 0.6rem 0; border-bottom: 0.5px solid rgba(92,74,58,0.2);
+    transition: border-color 0.3s; letter-spacing: 0.03em;
+    -webkit-appearance: none; appearance: none;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+    border-bottom-color: var(--clay);
+  }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239C8C7C'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.5rem center; padding-right: 2rem;
+  }
+  select option { color: var(--deep); background: var(--warm-white); }
+  textarea { resize: vertical; min-height: 200px; line-height: 1.85; }
+  .char-count {
+    font-family: var(--sans); font-size: 0.68rem; color: var(--muted);
+    text-align: right; margin-top: 0.5rem; letter-spacing: 0.06em; transition: color 0.3s;
+  }
+  .char-count.near { color: var(--clay); }
+  .char-count.over { color: #b05a5a; }
+  .radio-group, .check-group { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 0.5rem; }
+  .radio-label, .check-label {
+    display: flex; align-items: flex-start; gap: 1rem; cursor: pointer;
+    font-family: var(--sans); font-size: 0.85rem; font-weight: 300;
+    color: var(--deep); line-height: 1.6; letter-spacing: normal; text-transform: none; margin-bottom: 0;
+  }
+  .radio-label input, .check-label input {
+    width: auto; border: none; margin-top: 0.25rem; flex-shrink: 0; accent-color: var(--clay);
+  }
+  .consent-block {
+    background: var(--warm-white); border: 0.5px solid rgba(92,74,58,0.12); padding: 1.5rem; margin-top: 0.5rem;
+  }
+  .consent-text {
+    font-family: var(--sans); font-size: 0.78rem; font-weight: 300; line-height: 1.85; color: var(--muted);
+  }
+  .consent-text strong { color: var(--deep); font-weight: 400; }
+  .form-submit { padding-top: 2.5rem; border-bottom: none; }
+  .btn-submit {
+    width: 100%; font-family: var(--sans); font-size: 0.7rem; font-weight: 400;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--warm-white); background: var(--deep);
+    padding: 1.2rem 3.5rem; border: 1px solid var(--deep);
+    cursor: pointer; transition: background 0.35s, border-color 0.35s;
+  }
+  .btn-submit:hover { background: var(--brown); border-color: var(--brown); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .submit-note {
+    font-family: var(--sans); font-size: 0.72rem; font-weight: 300;
+    color: var(--muted); text-align: center; margin-top: 1.2rem;
+    letter-spacing: 0.04em; line-height: 1.7;
+  }
+
+  /* SUCCESS */
+  .success-overlay {
+    display: none; text-align: center; padding: 5rem 2rem;
+    background: var(--cream); border: 0.5px solid rgba(92,74,58,0.12);
+  }
+  .success-overlay.visible { display: block; }
+  .success-icon { font-family: var(--serif); font-size: 3rem; color: var(--clay); margin-bottom: 2rem; }
+  .success-title {
+    font-family: var(--serif); font-size: 2.2rem; font-weight: 300;
+    color: var(--deep); margin-bottom: 1.5rem; line-height: 1.3;
+  }
+  .success-title em { font-style: italic; color: var(--brown); }
+  .success-body {
+    font-family: var(--sans); font-size: 0.88rem; font-weight: 300;
+    color: var(--muted); line-height: 1.9; max-width: 400px; margin: 0 auto 2.5rem;
+  }
+  .btn-outline {
+    display: inline-block; font-family: var(--sans); font-size: 0.7rem; font-weight: 400;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--deep); background: transparent;
+    padding: 1rem 2.5rem; text-decoration: none; border: 1px solid rgba(92,74,58,0.35);
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .btn-outline:hover { background: var(--sand); border-color: var(--clay); }
+
+  /* QUOTE STRIP */
+  .quote-strip { background: var(--clay); padding: 1.5rem 3rem; text-align: center; }
+  .quote-strip p {
+    font-family: var(--serif); font-size: 1rem; font-style: italic;
+    color: var(--warm-white); letter-spacing: 0.04em;
+  }
+
+  /* FOOTER */
+  footer { background: var(--deep); padding: 4rem 3rem 3rem; }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .footer-logo {
+    font-family: var(--serif); font-size: 1.2rem; font-weight: 400;
+    letter-spacing: 0.2em; text-transform: lowercase; color: var(--cream); margin-bottom: 1.5rem;
+  }
+  .footer-tagline { font-family: var(--serif); font-size: 0.95rem; font-style: italic; color: var(--clay); margin-bottom: 2.5rem; }
+  .footer-rule { width: 100%; height: 0.5px; background: rgba(250,247,242,0.08); margin-bottom: 2rem; }
+  .footer-copy { font-family: var(--sans); font-size: 0.7rem; color: rgba(250,247,242,0.2); letter-spacing: 0.08em; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.12s; }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .page-header { padding: 8rem 1.5rem 4rem; }
+    .form-section { padding: 3rem 1.5rem 5rem; }
+    .form-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .form-sidebar { position: static; }
+  }
+  @media (max-width: 600px) {
+    .page-title { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">to truly live</a>
+  <a class="nav-back" href="index.html">Back to Home</a>
+</nav>
+
+<div class="page-header">
+  <div class="header-inner">
+    <div class="section-label">The Story Portal</div>
+    <h1 class="page-title">Your story belongs<br><em>in the open.</em></h1>
+    <div class="rule"></div>
+    <p class="header-body">Not every chapter is meant to be kept quiet. If something you've lived through could reach a woman who needs to know she's not alone — this is where you send it.</p>
+  </div>
+</div>
+
+<div class="form-section">
+  <div class="form-inner reveal">
+
+    <aside class="form-sidebar">
+      <h2 class="sidebar-heading">What makes a <em>story</em> for to truly live?</h2>
+      <p class="sidebar-note">We're not looking for polished essays or resolved endings. We're looking for truth — the kind that other women will read and feel seen by.</p>
+      <blockquote class="sidebar-promise">"Not everything you've lived through was meant to stay silent."</blockquote>
+      <div class="sidebar-topics">
+        <div class="topics-label">Stories we carry</div>
+        <span class="topic-pill">Becoming</span>
+        <span class="topic-pill">Healing</span>
+        <span class="topic-pill">Identity</span>
+        <span class="topic-pill">Grief</span>
+        <span class="topic-pill">Reinvention</span>
+        <span class="topic-pill">Relationships</span>
+        <span class="topic-pill">Work & Purpose</span>
+        <span class="topic-pill">Motherhood</span>
+        <span class="topic-pill">Body</span>
+        <span class="topic-pill">Faith</span>
+        <span class="topic-pill">Leaving</span>
+        <span class="topic-pill">Beginning Again</span>
+      </div>
+    </aside>
+
+    <div>
+      <div class="success-overlay" id="successState">
+        <div class="success-icon">✦</div>
+        <h2 class="success-title">Your story<br>has been <em>received.</em></h2>
+        <p class="success-body">Thank you for trusting to truly live with something real. We read every submission with care and will be in touch if your story is selected to be featured.</p>
+        <a href="index.html" class="btn-outline">Return Home</a>
+      </div>
+
+      <form class="story-form" id="storyForm">
+
+        <div class="field-group">
+          <label for="f_name">Your Name <span class="label-note">How you'd like to be introduced if featured</span></label>
+          <input type="text" id="f_name" placeholder="First name, or a name you go by" required>
+        </div>
+
+        <div class="field-group">
+          <label for="f_email">Email Address <span class="label-note">Only used to reach you about your story</span></label>
+          <input type="email" id="f_email" placeholder="your@email.com" required>
+        </div>
+
+        <div class="field-group">
+          <label>How would you like to be credited?</label>
+          <div class="radio-group">
+            <label class="radio-label"><input type="radio" name="credit" value="Full name" required> Full name</label>
+            <label class="radio-label"><input type="radio" name="credit" value="First name only"> First name only</label>
+            <label class="radio-label"><input type="radio" name="credit" value="Anonymously"> Anonymously — my words, without my name</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="f_category">Story Theme <span class="label-note">Choose the theme that feels closest</span></label>
+          <select id="f_category" required>
+            <option value="" disabled selected>Select a theme…</option>
+            <option>Becoming</option>
+            <option>Healing</option>
+            <option>Identity</option>
+            <option>Grief &amp; Loss</option>
+            <option>Reinvention</option>
+            <option>Relationships</option>
+            <option>Work &amp; Purpose</option>
+            <option>Motherhood</option>
+            <option>Body &amp; Wellness</option>
+            <option>Faith &amp; Spirituality</option>
+            <option>Leaving</option>
+            <option>Beginning Again</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="f_title">A working title <span class="label-note">This can change — it's just a starting place</span></label>
+          <input type="text" id="f_title" placeholder="e.g. The year I stopped pretending">
+        </div>
+
+        <div class="field-group">
+          <label for="f_story">Your Story <span class="label-note">Write as much or as little as you need. There's no perfect length — only honesty.</span></label>
+          <textarea id="f_story" placeholder="Begin wherever feels true…" maxlength="8000" required></textarea>
+          <div class="char-count" id="charCount">0 / 8,000</div>
+        </div>
+
+        <div class="field-group">
+          <label for="f_pull">A line that captures it <span class="label-note">One sentence from your story that you feel most</span></label>
+          <input type="text" id="f_pull" placeholder="The sentence you keep coming back to…">
+        </div>
+
+        <div class="field-group">
+          <label>What is this story for you?</label>
+          <div class="check-group" id="purposeGroup">
+            <label class="check-label"><input type="checkbox" value="Release — I needed to write it"> Release — I needed to write it</label>
+            <label class="check-label"><input type="checkbox" value="Connection — I want others to feel less alone"> Connection — I want others to feel less alone</label>
+            <label class="check-label"><input type="checkbox" value="Witnessing — I want to be seen in this"> Witnessing — I want to be seen in this</label>
+            <label class="check-label"><input type="checkbox" value="All of these"> All of these</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>Consent &amp; Understanding</label>
+          <div class="consent-block">
+            <p class="consent-text">By submitting your story, you confirm that <strong>this is your own lived experience</strong>, written in your own words. You understand that submission does not guarantee publication. If selected, to truly live may make light editorial adjustments for clarity — and will always seek your approval before publishing. <strong>Your story remains yours.</strong></p>
+          </div>
+          <div style="margin-top:1rem;">
+            <label class="check-label"><input type="checkbox" id="f_consent" required> I understand and I'm ready to share</label>
+          </div>
+        </div>
+
+        <div class="field-group form-submit">
+          <button type="submit" class="btn-submit" id="submitBtn">Send My Story</button>
+          <p class="submit-note">Submissions are reviewed with care.<br>You'll hear from us if your story is selected to be featured.</p>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="quote-strip">
+  <p>"Your story, in its truest form, is already enough."</p>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">to truly live</div>
+    <p class="footer-tagline">to truly live is not a destination. It's a decision.</p>
+    <div class="footer-rule"></div>
+    <p class="footer-copy">© 2025 to truly live. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  const GOOGLE_FORM_ID = '1FAIpQLSefLO2nEpWplR47ZpaWJG9yuehji-ZK_LvuohEnO8Ahnc2Q8Q';
+  const E = {
+    name      : 'entry.1839613930',
+    email     : 'entry.845829767',
+    credit    : 'entry.766063180',
+    category  : 'entry.867974151',
+    title     : 'entry.1792374533',
+    story     : 'entry.740801995',
+    pull      : 'entry.2144022205',
+    purpose   : 'entry.1537805340',
+    consent   : 'entry.1792137659',
+  };
+
+  // Nav scroll
+  window.addEventListener('scroll', () => {
+    document.querySelector('nav').style.padding =
+      window.scrollY > 60 ? '1rem 3rem' : '1.5rem 3rem';
+  });
+
+  // Reveal on scroll
+  const obs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Character count
+  const storyEl = document.getElementById('f_story');
+  const countEl = document.getElementById('charCount');
+  storyEl.addEventListener('input', () => {
+    const n = storyEl.value.length;
+    countEl.textContent = `${n.toLocaleString()} / 8,000`;
+    countEl.className = 'char-count' + (n > 7600 ? ' over' : n > 6400 ? ' near' : '');
+  });
+
+  // Submit → POST directly to Google Form, then redirect to thank-you page
+  document.getElementById('storyForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!document.getElementById('f_consent').checked) {
+      alert('Please confirm your consent before submitting.');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const purposes = [...document.querySelectorAll('#purposeGroup input:checked')]
+      .map(cb => cb.value).join(', ') || 'Not specified';
+    const creditVal = document.querySelector('input[name="credit"]:checked');
+
+    // Build form and submit directly — Google will redirect to their confirmation
+    // but we intercept with a return URL so user comes back to our thank-you page
+    const gForm = document.createElement('form');
+    gForm.method = 'POST';
+    gForm.action = `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`;
+    gForm.style.display = 'none';
+
+    const fields = {
+      [E.name]     : document.getElementById('f_name').value,
+      [E.email]    : document.getElementById('f_email').value,
+      [E.credit]   : creditVal ? creditVal.value : '',
+      [E.category] : document.getElementById('f_category').value,
+      [E.title]    : document.getElementById('f_title').value,
+      [E.story]    : storyEl.value,
+      [E.pull]     : document.getElementById('f_pull').value,
+      [E.purpose]  : purposes,
+      [E.consent]  : 'I understand and I am ready to share',
+    };
+
+    Object.entries(fields).forEach(([name, value]) => {
+      const inp = document.createElement('input');
+      inp.type  = 'hidden';
+      inp.name  = name;
+      inp.value = value;
+      gForm.appendChild(inp);
+    });
+
+    // Store flag so thank-you page knows submission was real
+    sessionStorage.setItem('ttl_submitted', '1');
+
+    document.body.appendChild(gForm);
+    gForm.submit();
+  });
+
+  // If user lands back on this page after submitting, show success
+  if (sessionStorage.getItem('ttl_submitted') === '1') {
+    sessionStorage.removeItem('ttl_submitted');
+    document.getElementById('storyForm').style.display = 'none';
+    document.getElementById('successState').classList.add('visible');
+  }
+</script>
+</body>
+</html>
