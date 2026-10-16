@@ -50,4 +50,4 @@ To Truly Live is more than a website. It is an evolving vision for a world where
 
 ---
 
-Created with intention by the founder of To Truly Live.
+Created with intention by the founder of to truly live.
