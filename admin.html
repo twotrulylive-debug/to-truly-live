@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="favicon.png">
+<title>admin | to truly live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#38281F; --paper:#FAF6EE; --cream:#F0E8DA; --muted:#5E5347; --accent:#7A5A45; --cobalt:#2F45B5; --on-dark:#F3ECE0; --serif:'Fraunces',Georgia,serif; --sans:'Instrument Sans',system-ui,sans-serif; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.5; }
+  header { background: var(--ink); color: var(--on-dark); padding: 0.9rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+  header img { height: 1.4rem; display: block; }
+  header button { background: none; border: 0; color: var(--on-dark); font: inherit; font-size: 0.9rem; cursor: pointer; text-decoration: underline; }
+  main { max-width: 760px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+  h1 { font-family: var(--serif); font-size: 1.9rem; line-height: 1.15; }
+  h2 { font-family: var(--serif); font-size: 1.35rem; margin-bottom: 0.6rem; }
+  .muted { color: var(--muted); font-size: 0.92rem; }
+  .box { background: #fff; border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--accent); padding: 1rem; margin-top: 1.25rem; }
+  .blue { background: var(--cobalt); color: var(--on-dark); box-shadow: 4px 4px 0 var(--ink); }
+  .blue .muted { color: #D3D8F2; }
+  .tabs { display: flex; gap: 0.5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+  .tabs button { flex: 1 1 auto; min-height: 44px; border: 2px solid var(--ink); background: var(--paper); font: inherit; font-weight: 600; cursor: pointer; padding: 0.5rem 0.9rem; }
+  .tabs button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+  label { display: block; font-weight: 600; font-size: 0.92rem; margin-top: 0.9rem; }
+  input, textarea { display: block; width: 100%; margin-top: 0.35rem; padding: 0.7rem 0.8rem; min-height: 44px; border: 2px solid var(--ink); border-radius: 0; font: inherit; background: var(--paper); -webkit-appearance: none; }
+  textarea { min-height: 90px; resize: vertical; }
+  .btn { display: inline-block; min-height: 46px; padding: 0.65rem 1.3rem; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); font: inherit; font-weight: 600; cursor: pointer; margin-top: 1rem; }
+  .btn.alt { background: var(--paper); color: var(--ink); }
+  .btn.cob { background: var(--cobalt); border-color: var(--cobalt); color: var(--on-dark); }
+  .blue .btn { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .ans { border-top: 1px dashed var(--ink); padding: 1rem 0; }
+  .ans:first-child { border-top: 0; }
+  .ans .who { font-weight: 600; }
+  .ans .meta { font-size: 0.82rem; color: var(--muted); }
+  .ans p.t { font-family: var(--serif); font-size: 1.1rem; margin-top: 0.4rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .choices { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+  .choices button { flex: 1; min-height: 44px; border: 2px solid var(--ink); background: var(--paper); font: inherit; font-weight: 600; cursor: pointer; }
+  .choices button.on.pub { background: var(--cobalt); border-color: var(--cobalt); color: var(--on-dark); }
+  .choices button.on.skip { background: var(--muted); border-color: var(--muted); color: var(--paper); }
+  .status { margin-top: 0.75rem; font-weight: 500; min-height: 1.4em; }
+  .err { color: #9B2C2C; }
+  .pill { display: inline-block; border: 2px solid currentColor; padding: 0 0.55rem; font-size: 0.82rem; font-weight: 600; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header><img src="logo-light.png" alt="to truly live"><button id="logout" hidden>Log out</button></header>
+<main>
+
+  <section id="login">
+    <h1>Admin</h1>
+    <p class="muted" style="margin-top:0.4rem">Only you can see this page.</p>
+    <form id="loginForm" class="box">
+      <label for="pw" style="margin-top:0">Password</label>
+      <input type="password" id="pw" autocomplete="current-password" required>
+      <button class="btn" type="submit">Log in</button>
+      <p class="status" id="loginStatus" role="status"></p>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="box blue">
+      <p class="muted" id="wkLine"></p>
+      <h1 id="wkPrompt" style="margin-top:0.3rem"></h1>
+      <p style="margin-top:0.6rem"><span class="pill" id="wkState"></span></p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="answers" aria-selected="true">Answers</button>
+      <button role="tab" data-tab="newweek" aria-selected="false">New week</button>
+      <button role="tab" data-tab="messages" aria-selected="false">Messages</button>
+    </div>
+
+    <div id="tab-answers">
+      <div class="box">
+        <h2>This week's answers</h2>
+        <p class="muted" id="ansCount"></p>
+        <div id="ansList" style="margin-top:0.5rem"></div>
+      </div>
+      <div class="box">
+        <h2>Sunday: go live</h2>
+        <p class="muted">Publishes every answer marked <b>Publish</b> and switches the Write page to "Now reading". You can run it again if you change your mind.</p>
+        <button class="btn cob" id="goLive">Go live</button>
+        <button class="btn alt" id="reopen" hidden>Reopen for writing</button>
+        <p class="status" id="liveStatus" role="status"></p>
+      </div>
+    </div>
+
+    <div id="tab-newweek" hidden>
+      <form class="box" id="weekForm">
+        <h2>Wednesday: open the next prompt</h2>
+        <p class="muted">This moves this week (and its published answers) into "Top 8 past prompts" and opens a new week.</p>
+        <label for="nwPrompt">Prompt</label>
+        <input id="nwPrompt" maxlength="200" required>
+        <label for="nwNote">Line under the prompt (optional)</label>
+        <textarea id="nwNote" maxlength="400"></textarea>
+        <label for="nwLabel">Dates (for example: Nov 11 – 14)</label>
+        <input id="nwLabel" maxlength="40" required>
+        <label for="nwShort">Short name for this week's past-prompt tile (optional)</label>
+        <input id="nwShort" maxlength="24" placeholder="for example: Stopped believing">
+        <button class="btn" type="submit">Open the new week</button>
+        <p class="status" id="weekStatus" role="status"></p>
+      </form>
+      <form class="box" id="editForm">
+        <h2>Fix this week's wording</h2>
+        <label for="edPrompt">Prompt</label>
+        <input id="edPrompt" maxlength="200">
+        <label for="edNote">Line under the prompt</label>
+        <textarea id="edNote" maxlength="400"></textarea>
+        <label for="edLabel">Dates</label>
+        <input id="edLabel" maxlength="40">
+        <button class="btn alt" type="submit">Save changes</button>
+        <p class="status" id="editStatus" role="status"></p>
+      </form>
+    </div>
+
+    <div id="tab-messages" hidden>
+      <div class="box">
+        <h2>Contact messages</h2>
+        <div id="msgList"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  let PW = '';
+  try { PW = sessionStorage.getItem('ttl_admin') || ''; } catch (e) {}
+  let DATA = null;
+
+  async function api(method, payload) {
+    const r = await fetch('/api/admin', {
+      method, headers: Object.assign({ 'x-admin-password': PW }, payload ? { 'Content-Type': 'application/json' } : {}),
+      body: payload ? JSON.stringify(payload) : undefined
+    });
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) { const err = new Error(j.error || ('error ' + r.status)); err.status = r.status; throw err; }
+    return j;
+  }
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function when(iso) { try { return new Date(iso).toLocaleString('en-CA', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; } }
+
+  function renderAll() {
+    const s = DATA.site;
+    $('wkLine').textContent = 'Week ' + s.week + ' · ' + s.label;
+    $('wkPrompt').textContent = s.prompt;
+    $('wkState').textContent = s.state === 'open' ? 'Open for writing' : 'Now reading';
+    $('reopen').hidden = s.state === 'open';
+    $('edPrompt').value = s.prompt; $('edNote').value = s.note || ''; $('edLabel').value = s.label;
+
+    const list = $('ansList'); list.textContent = '';
+    const subs = DATA.subs || [], mod = DATA.mod || {};
+    const nPub = subs.filter(a => mod[a.id] === 'publish').length;
+    $('ansCount').textContent = subs.length + (subs.length === 1 ? ' answer' : ' answers') + ' so far · ' + nPub + ' marked to publish';
+    if (!subs.length) list.appendChild(el('p', 'muted', 'No answers yet.'));
+    subs.forEach(a => {
+      const row = el('div', 'ans');
+      row.appendChild(el('div', 'who', a.name || 'Anonymous'));
+      row.appendChild(el('div', 'meta', when(a.at) + (a.email ? ' · ' + a.email : '')));
+      row.appendChild(el('p', 't', a.text));
+      const c = el('div', 'choices');
+      [['publish', 'Publish', 'pub'], ['skip', 'Skip', 'skip']].forEach(([st, label, cls]) => {
+        const b = el('button', cls + (mod[a.id] === st ? ' on' : ''), label); b.type = 'button';
+        b.addEventListener('click', async () => {
+          const next = mod[a.id] === st ? 'pending' : st;
+          try { const r = await api('POST', { action: 'mark', id: a.id, status: next }); DATA.mod = r.mod; renderAll(); } catch (e) { alert(e.message); }
+        });
+        c.appendChild(b);
+      });
+      row.appendChild(c); list.appendChild(row);
+    });
+
+    const ml = $('msgList'); ml.textContent = '';
+    const msgs = DATA.contacts || [];
+    if (!msgs.length) ml.appendChild(el('p', 'muted', 'No messages yet.'));
+    msgs.forEach(m => {
+      const row = el('div', 'ans');
+      row.appendChild(el('div', 'who', m.subject));
+      row.appendChild(el('div', 'meta', m.name + ' · ' + m.email + ' · ' + when(m.at)));
+      row.appendChild(el('p', 't', m.message));
+      const c = el('div', 'choices');
+      const rep = el('a', '', 'Reply'); rep.href = 'mailto:' + encodeURIComponent(m.email).replace('%40', '@') + '?subject=' + encodeURIComponent('Re: ' + m.subject);
+      rep.style.cssText = 'flex:1;min-height:44px;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:600;text-decoration:none;color:var(--ink)';
+      const del = el('button', '', 'Delete'); del.type = 'button';
+      del.addEventListener('click', async () => { if (!confirm('Delete this message?')) return; try { await api('POST', { action: 'delcontact', id: m.id }); await load(); } catch (e) { alert(e.message); } });
+      c.appendChild(rep); c.appendChild(del); row.appendChild(c); ml.appendChild(row);
+    });
+  }
+
+  async function load() {
+    DATA = await api('GET');
+    $('login').hidden = true; $('app').hidden = false; $('logout').hidden = false;
+    renderAll();
+  }
+
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); PW = $('pw').value; $('loginStatus').className = 'status'; $('loginStatus').textContent = 'Checking…';
+    try { await load(); try { sessionStorage.setItem('ttl_admin', PW); } catch (e2) {} $('loginStatus').textContent = ''; }
+    catch (err) {
+      $('loginStatus').className = 'status err';
+      $('loginStatus').textContent = err.status === 503 ? 'The admin isn\'t set up yet (database or password missing in Vercel).' : err.message === 'wrong password' ? 'That password isn\'t right.' : err.message;
+    }
+  });
+  $('logout').addEventListener('click', () => { try { sessionStorage.removeItem('ttl_admin'); } catch (e) {} location.reload(); });
+
+  document.querySelectorAll('[role=tab]').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('[role=tab]').forEach(x => x.setAttribute('aria-selected', String(x === t)));
+    ['answers', 'newweek', 'messages'].forEach(n => { $('tab-' + n).hidden = n !== t.dataset.tab; });
+  }));
+
+  $('goLive').addEventListener('click', async () => {
+    const n = (DATA.subs || []).filter(a => DATA.mod[a.id] === 'publish').length;
+    if (!confirm('Publish ' + n + (n === 1 ? ' answer' : ' answers') + ' and switch the page to "Now reading"?')) return;
+    $('liveStatus').textContent = 'Publishing…';
+    try { const r = await api('POST', { action: 'golive' }); $('liveStatus').textContent = 'Live. ' + r.published + ' published.'; await load(); }
+    catch (e) { $('liveStatus').textContent = e.message; }
+  });
+  $('reopen').addEventListener('click', async () => {
+    if (!confirm('Switch back to "Open for writing" for this same week?')) return;
+    try { await api('POST', { action: 'reopen' }); $('liveStatus').textContent = 'Reopened.'; await load(); } catch (e) { $('liveStatus').textContent = e.message; }
+  });
+
+  $('weekForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!confirm('Open week ' + (DATA.site.week + 1) + '? This week moves into past prompts.')) return;
+    $('weekStatus').textContent = 'Opening…';
+    try {
+      await api('POST', { action: 'newweek', prompt: $('nwPrompt').value, note: $('nwNote').value, label: $('nwLabel').value, short: $('nwShort').value });
+      $('weekStatus').textContent = 'Week ' + (DATA.site.week + 1) + ' is open.'; e.target.reset(); await load();
+    } catch (err) { $('weekStatus').textContent = err.message; }
+  });
+  $('editForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); $('editStatus').textContent = 'Saving…';
+    try { await api('POST', { action: 'edit', prompt: $('edPrompt').value, note: $('edNote').value, label: $('edLabel').value }); $('editStatus').textContent = 'Saved.'; await load(); }
+    catch (err) { $('editStatus').textContent = err.message; }
+  });
+
+  if (PW) load().catch(() => { PW = ''; });
+</script>
+</body>
+</html>
