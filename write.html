@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<title>write | to truly live</title>
+<meta name="description" content="a place for women to just be. one honest question every week.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="to truly live">
+<meta property="og:title" content="to truly live">
+<meta property="og:description" content="a place for women to just be. one honest question every week.">
+<meta property="og:image" content="https://to-truly-live.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #38281F; --paper: #FAF6EE; --cream: #F0E8DA; --muted: #5E5347;
+    --accent: #7A5A45; --cobalt: #2F45B5; --on-dark: #F3ECE0; --on-dark-muted: #B9AE9C;
+    --serif: 'Fraunces', Georgia, serif; --sans: 'Instrument Sans', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background-color: var(--paper); background-image: radial-gradient(#E4D9C6 1.5px, transparent 1.5px); background-size: 22px 22px; color: var(--ink); font-family: var(--sans); font-size: 1rem; line-height: 1.6; }
+  a { color: inherit; }
+  button, input, textarea { font: inherit; color: inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 3px; }
+
+  /* header */
+  header { position: sticky; top: 0; z-index: 10; background: var(--ink); color: var(--on-dark); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 1rem; max-width: 1180px; margin: 0 auto; }
+  .logo { font-family: var(--serif); font-weight: 700; font-size: 1.3rem; text-decoration: none; letter-spacing: -0.01em; }
+  nav ul { display: flex; gap: 0.25rem; list-style: none; }
+  nav a { display: block; font-weight: 500; font-size: 0.95rem; text-decoration: none; padding: 0.6rem 0.7rem; }
+  nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  nav a[aria-current="page"] { text-decoration: underline; text-underline-offset: 6px; }
+
+  /* page grid: one column on phones */
+  .page { max-width: 1180px; margin: 0 auto; padding: 1.25rem 1rem 3rem; display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); grid-template-areas: "main" "left" "right"; }
+  .main { grid-area: main; display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+  .left { grid-area: left; display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+  .right { grid-area: right; display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+
+  .box { background: var(--paper); border: 2px solid var(--ink); }
+  .box.hard { box-shadow: 4px 4px 0 var(--accent); }
+  .box .bh { padding: 0.65rem 0.9rem; border-bottom: 2px solid var(--ink); font-weight: 600; font-size: 0.95rem; color: var(--cobalt); background: var(--paper); }
+  .box .bb { padding: 1rem 0.9rem; }
+  .box.cream { background: var(--cream); }
+
+  /* prompt card */
+  .prompt { background: var(--cobalt); color: var(--on-dark); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); padding: 1.5rem 1.25rem 1.4rem; }
+  .prompt .eyebrow { display: flex; flex-wrap: wrap; gap: 0.35rem 0.75rem; align-items: center; font-weight: 600; font-size: 0.9rem; color: #D3D8F2; }
+  .prompt .tag { border: 2px solid var(--on-dark); color: var(--on-dark); padding: 0 0.6rem; font-size: 0.85rem; }
+  .prompt h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(2.05rem, 9.2vw, 3.1rem); line-height: 1.05; letter-spacing: -0.02em; margin: 0.9rem 0 1rem; text-wrap: balance; }
+  .prompt p.note { font-size: 1.05rem; line-height: 1.55; max-width: 46ch; }
+
+  /* composer */
+  .compose { background: var(--cream); border: 2px solid var(--ink); padding: 1.1rem; }
+  .compose label.l { display: block; font-weight: 600; font-size: 0.95rem; }
+  .compose textarea { display: block; width: 100%; min-height: 190px; margin-top: 0.5rem; padding: 0.9rem; background: var(--paper); border: 2px solid var(--ink); border-radius: 0; resize: vertical; font-family: var(--serif); font-size: 1.15rem; line-height: 1.5; -webkit-appearance: none; appearance: none; }
+  .compose textarea:focus, .compose input[type=text]:focus, .compose input[type=email]:focus { outline: none; border-color: var(--cobalt); box-shadow: 0 0 0 3px rgba(47,69,181,.22); }
+  .count { font-size: 0.85rem; color: var(--muted); text-align: right; margin-top: 0.35rem; }
+  .compose fieldset { border: 0; min-width: 0; margin-top: 1rem; }
+  .compose legend { font-weight: 600; font-size: 0.95rem; padding: 0; }
+  .opts { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.5rem; }
+  .opts label { flex: 1 1 8rem; text-align: center; cursor: pointer; padding: 0.75rem 1rem; min-height: 48px; border: 2px solid var(--ink); background: var(--paper); font-weight: 500; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+  .opts input { position: absolute; opacity: 0; pointer-events: none; }
+  .opts label:has(input:checked) { background: var(--cobalt); border-color: var(--cobalt); color: var(--on-dark); }
+  .opts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .compose input[type=text], .compose input[type=email] { display: block; width: 100%; margin-top: 0.6rem; padding: 0.8rem 0.9rem; min-height: 48px; background: var(--paper); border: 2px solid var(--ink); border-radius: 0; font-size: 1rem; -webkit-appearance: none; appearance: none; }
+  .compose .sub { font-weight: 400; font-size: 0.85rem; color: var(--muted); }
+  .field { margin-top: 1rem; }
+  .btn { display: block; width: 100%; font-weight: 600; font-size: 1.05rem; min-height: 52px; padding: 0.85rem 1.5rem; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; transition: background .2s, color .2s, border-color .2s; margin-top: 1.1rem; }
+  .btn:hover { background: var(--cobalt); border-color: var(--cobalt); color: var(--on-dark); }
+  .btn:disabled { opacity: .6; cursor: default; }
+  .status { font-weight: 500; font-size: 0.95rem; margin-top: 0.7rem; min-height: 1.4em; }
+  .status.err { color: #9B2C2C; }
+  .fine { font-size: 0.82rem; color: var(--muted); margin-top: 0.7rem; line-height: 1.5; }
+  .hp { position: absolute; left: -9999px; }
+  .thanks { background: var(--cobalt); color: var(--on-dark); border: 2px solid var(--ink); padding: 1.75rem 1.25rem; }
+  .thanks h2 { font-family: var(--serif); font-size: 1.8rem; line-height: 1.1; }
+  .thanks p { margin-top: 0.7rem; font-size: 1.05rem; }
+
+  /* read along */
+  .rhead { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 0.6rem; margin-top: 0.5rem; }
+  .rhead h2 { font-family: var(--serif); font-weight: 600; font-size: 1.7rem; line-height: 1.1; }
+  .rhead span { font-size: 0.85rem; color: var(--muted); }
+  .post { background: var(--paper); border: 2px solid var(--ink); padding: 1.1rem 1.1rem 1.15rem; }
+  .post .who { display: flex; align-items: center; gap: 0.7rem; font-size: 0.95rem; }
+  .post .av { width: 38px; height: 38px; flex: none; display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--paper); }
+  .post p { font-family: var(--serif); font-size: 1.2rem; line-height: 1.5; margin-top: 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .quiet { color: var(--muted); }
+  .next { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; line-height: 1.25; }
+
+  /* side boxes */
+  .week-no { font-family: var(--serif); font-weight: 700; font-size: 3.4rem; line-height: 1; }
+  .small { font-size: 0.92rem; color: var(--muted); }
+  .how ol { padding-left: 1.2rem; display: grid; gap: 0.5rem; font-size: 0.95rem; color: var(--muted); line-height: 1.45; }
+  details.how-m > summary { list-style: none; cursor: pointer; }
+  details.how-m > summary::-webkit-details-marker { display: none; }
+  details.how-m > summary::after { content: "+"; float: right; font-weight: 700; }
+  details.how-m[open] > summary::after { content: "–"; }
+
+  .past-list { display: grid; }
+  details.pw { border-top: 1px solid var(--muted); }
+  details.pw:first-child { border-top: 0; }
+  details.pw > summary { list-style: none; cursor: pointer; display: flex; gap: 0.75rem; align-items: center; padding: 0.75rem 0; min-height: 56px; }
+  details.pw > summary::-webkit-details-marker { display: none; }
+  .pw .sq { flex: none; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 700; font-size: 1.15rem; color: var(--on-dark); }
+  .pw .pt { font-family: var(--serif); font-size: 1rem; line-height: 1.3; font-weight: 600; }
+  .pw .wk { display: block; font-family: var(--sans); font-weight: 500; font-size: 0.78rem; color: var(--muted); }
+  .pw .pr { display: grid; gap: 0.75rem; padding: 0.25rem 0 1rem; }
+  .pw .post { padding: 0.9rem; }
+  .pw .post p { font-size: 1.05rem; }
+
+  .signup-box { background: var(--cobalt); color: var(--on-dark); border: 2px solid var(--ink); padding: 1.25rem; }
+  .signup-box h2 { font-family: var(--serif); font-weight: 700; font-size: 1.45rem; line-height: 1.15; }
+  .signup-box p { margin-top: 0.4rem; font-size: 0.95rem; line-height: 1.45; }
+  .signup-box input[type=email] { display: block; width: 100%; margin-top: 0.9rem; padding: 0.8rem 0.9rem; min-height: 48px; border: 2px solid var(--ink); border-radius: 0; background: var(--paper); color: var(--ink); font-size: 1rem; -webkit-appearance: none; appearance: none; }
+  .signup-box .btn { background: var(--ink); margin-top: 0.7rem; }
+  .signup-box .btn:hover { background: var(--paper); color: var(--ink); border-color: var(--ink); }
+  .signup-box .status { color: var(--on-dark); }
+  .signup-box .status.err { color: #FFD6D6; }
+
+
+  .post .when { font-size: 0.82rem; color: var(--muted); }
+  .post .foot { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; border-top: 1px dashed var(--ink); margin-top: 0.9rem; padding-top: 0.6rem; }
+  .post .tags { font-size: 0.9rem; font-weight: 500; color: var(--cobalt); }
+  .heart { display: inline-flex; gap: 0.5rem; align-items: center; border: 0; background: none; font-size: 0.95rem; color: var(--ink); padding: 0.55rem 0.2rem; min-height: 44px; cursor: pointer; }
+  .heart[hidden] { display: none; }
+  .heart svg { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .heart[aria-pressed="true"] svg { fill: var(--cobalt); stroke: var(--cobalt); }
+  .heart[aria-pressed="true"] { color: var(--cobalt); font-weight: 600; }
+  .post .foot[hidden] { display: none; }
+  .t8 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.6rem; align-items: start; }
+  .t8 button { border: 0; background: none; text-align: center; font-size: 0.72rem; line-height: 1.25; color: var(--ink); padding: 0; cursor: pointer; min-height: 44px; }
+  .t8 .sq { display: flex; height: 56px; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 700; font-size: 1.25rem; color: var(--on-dark); margin-bottom: 0.3rem; }
+  .t8 button[aria-expanded="true"] .sq { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+  .t8 button:hover .sq { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+  #pastPanel { margin-top: 1rem; border-top: 2px solid var(--ink); padding-top: 1rem; display: grid; gap: 0.9rem; }
+  #pastPanel h3 { font-family: var(--serif); font-size: 1.1rem; line-height: 1.3; }
+  #pastPanel .wk { display: block; font-family: var(--sans); font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+  #pastPanel .post { padding: 0.9rem; }
+  #pastPanel .post p { font-size: 1.05rem; }
+
+  /* photo + footer */
+  .photoband { margin: 0; }
+  .photoband img { width: 100%; height: clamp(200px, 38vw, 460px); object-fit: cover; object-position: 50% 45%; display: block; }
+  .credit { max-width: 1180px; margin: 0 auto; padding: 0.5rem 1rem 0; font-size: 0.78rem; color: var(--muted); }
+  .credit a { text-decoration: underline; }
+  footer { background: var(--ink); color: var(--on-dark); padding: 3rem 0 2.5rem; margin-top: 2.5rem; }
+  .fwrap { max-width: 1180px; margin: 0 auto; padding: 0 1rem; }
+  footer .logo { font-size: 1.5rem; }
+  footer .statement { font-family: var(--serif); font-size: clamp(1.3rem, 5vw, 1.9rem); max-width: 28ch; margin: 1rem 0 2rem; line-height: 1.3; }
+  footer ul { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; list-style: none; padding-top: 1.25rem; border-top: 1px solid rgba(243,236,224,.25); }
+  footer ul a { display: block; padding: 0.5rem 0; font-size: 0.95rem; color: var(--on-dark-muted); text-decoration: none; }
+  footer ul a:hover { color: var(--on-dark); }
+  footer .copy { margin-top: 1.5rem; font-size: 0.82rem; color: var(--on-dark-muted); }
+
+  /* wider screens: three columns */
+  @media (min-width: 1000px) {
+    .bar { padding: 1rem 2rem; }
+    .page { padding: 2.5rem 2rem 4rem; gap: 2rem; grid-template-columns: 230px minmax(0, 1fr) 290px; grid-template-areas: "left main right"; align-items: start; }
+    .prompt { padding: 2.25rem 2.1rem 2rem; box-shadow: 6px 6px 0 var(--ink); }
+    .compose { padding: 1.4rem; }
+    .btn { display: inline-block; width: auto; }
+    .opts label { flex: 0 0 auto; }
+    .fwrap, .credit { padding-left: 2rem; padding-right: 2rem; }
+    details.how-m > summary { pointer-events: none; }
+    details.how-m > summary::after { content: none; }
+  }
+  .logo-img { display: block; height: 1.5rem; width: auto; }
+  footer .logo-img { height: 2rem; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="logo" href="write.html" aria-label="to truly live"><img src="logo-light.png" alt="to truly live" class="logo-img"></a>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="write.html" aria-current="page">Write</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="page">
+
+  <main class="main" id="main">
+    <section class="prompt" aria-labelledby="wPrompt">
+      <div class="eyebrow"><span id="wLabel"></span><span class="tag" id="wTag"></span></div>
+      <h1 id="wPrompt"></h1>
+      <p class="note" id="wNote" hidden></p>
+    </section>
+
+    <section id="openBlock" hidden>
+      <form class="compose" id="wForm" novalidate>
+        <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <input type="hidden" name="form_type" value="journal">
+        <input type="hidden" name="week" id="fWeek">
+        <input type="hidden" name="prompt" id="fPrompt">
+        <input type="hidden" name="_subject" id="fSubject">
+
+        <label class="l" for="response">Your answer</label>
+        <textarea id="response" name="response" maxlength="1200" placeholder="Start anywhere. It doesn't need to be tidy." required></textarea>
+        <div class="count" id="wcount" aria-live="polite">0 / 1,200</div>
+
+        <fieldset>
+          <legend>Share as</legend>
+          <div class="opts">
+            <label><input type="radio" name="credit" value="Name" checked> Use a name</label>
+            <label><input type="radio" name="credit" value="Anonymous"> Anonymous</label>
+          </div>
+          <div id="nameline"><input type="text" id="first" name="display_name" maxlength="30" placeholder="First name or a pseudonym" autocomplete="off" aria-label="Name to show"><p class="fine" style="margin-top:0.5rem">Use any name you like. It doesn't need to be your real one.</p></div>
+        </fieldset>
+
+        <div class="field">
+          <label class="l" for="wemail">Email <span class="sub">(optional, never shown)</span></label>
+          <p class="fine" style="margin:0.2rem 0 0">Add it if you'd like a copy of your answer to keep.</p>
+          <input type="email" id="wemail" name="email" autocomplete="email" inputmode="email">
+        </div>
+
+        <button class="btn" type="submit" id="wsend">Share answer</button>
+        <div class="status" id="wstatus" role="status" aria-live="polite"></div>
+        <p class="fine">Answers are read before they're shared. By sending, you give to truly live permission to publish yours under the name you chose. You can ask us to remove it at any time.</p>
+      </form>
+      <div class="thanks" id="wthanks" hidden>
+        <h2>Thank you for writing.</h2>
+        <p>Answers are shared on Sunday. Come back and read what other women wrote.</p>
+        <div id="copyRow" style="display:grid;gap:0.6rem;margin-top:1.25rem" hidden>
+          <a class="btn" id="mailCopy" href="#" style="background:var(--paper);color:var(--ink);border-color:var(--ink);text-align:center;text-decoration:none;margin-top:0;display:block;width:100%;line-height:1.4">Email me a copy of my answer</a>
+          <button class="btn" type="button" id="copyBtn" style="background:transparent;color:var(--on-dark);border-color:var(--on-dark);margin-top:0">Copy my answer</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="readBlock" hidden>
+      <div class="rhead"><h2>Read along</h2><span id="readSub"></span></div>
+      <div id="readList" style="display:grid;gap:1.25rem;margin-top:1.25rem"></div>
+      <p class="next" id="nextLine" style="margin-top:1.5rem" hidden></p>
+    </section>
+  </main>
+
+  <aside class="left" aria-label="This week and how it works">
+    <details class="box how-m how" id="howBox">
+      <summary class="bh">How it works</summary>
+      <ol class="bb" style="padding-left:2.2rem">
+        <li><b>Wednesday:</b> a new prompt opens.</li>
+        <li><b>Saturday:</b> it closes. Write as much or as little as you like, under any name or anonymously.</li>
+        <li><b>Sunday:</b> everyone's answers are published here to read.</li>
+      </ol>
+    </details>
+    <section class="box hard cream">
+      <div class="bh">This week</div>
+      <div class="bb">
+        <div class="week-no" id="wNo">–</div>
+        <p class="small" id="wDates" style="margin:0.4rem 0 0.9rem"></p>
+        <p style="font-size:0.95rem"><b>Mood:</b> honest</p>
+        <p style="font-size:0.95rem;line-height:1.45;margin-top:0.2rem;margin-bottom:0.5rem"><b>Now playing:</b> <a href="https://open.spotify.com/track/4cpS5msS8MSKwZCjvINsQn" target="_blank" rel="noopener">Dreams by Nia Ashleigh</a></p>
+        <iframe title="Dreams by Nia Ashleigh on Spotify" style="border:0;border-radius:12px;display:block;width:100%;height:80px" src="https://open.spotify.com/embed/track/4cpS5msS8MSKwZCjvINsQn?theme=0" width="100%" height="80" frameborder="0" allow="encrypted-media; clipboard-write" loading="lazy"></iframe>
+      </div>
+    </section>
+  </aside>
+
+  <aside class="right" aria-label="Past prompts and email signup">
+    <section class="box hard" id="pastBlock" hidden>
+      <div class="bh">Top 8 past prompts</div>
+      <div class="bb"><div class="t8" id="pastList"></div><div id="pastPanel" hidden></div></div>
+    </section>
+    <section class="signup-box" id="prompt-email">
+      <h2>Get the next prompt in your inbox.</h2>
+      <p>One email when it opens. One when the answers are up.</p>
+      <form id="pForm" novalidate>
+        <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label for="pemail" class="hp">Email address</label>
+        <input type="email" id="pemail" placeholder="Your email address" autocomplete="email" inputmode="email" required>
+        <button class="btn" type="submit">Notify me</button>
+      </form>
+      <div class="status" id="pstatus" role="status" aria-live="polite"></div>
+    </section>
+  </aside>
+</div>
+
+<footer>
+  <div class="fwrap">
+    <a class="logo" href="write.html" aria-label="to truly live"><img src="logo-light.png" alt="to truly live" class="logo-img"></a>
+    <p class="statement">a place for women to just be. one honest question every week.</p>
+    <ul>
+      <li><a href="write.html" aria-current="page">Write</a></li>
+      <li><a href="about.html">More</a></li>
+    </ul>
+    <p class="copy">© 2026 to truly live. All rights reserved. Photography is illustrative and does not depict story authors.</p>
+  </div>
+</footer>
+
+<script>
+  // Answers go to your Formspree form; the prompt email list goes to the newsletter form.
+  const RESPONSE_ENDPOINT = 'https://formspree.io/f/mdeapegb';
+  const PROMPT_ENDPOINT = 'https://formspree.io/f/maeqleok';
+  const $ = (id) => document.getElementById(id);
+  const COLORS = ['#7A5A45', '#38281F', '#2F45B5'];
+
+  // keep "How it works" open on wide screens, collapsed on phones
+  const how = $('howBox');
+  const wide = window.matchMedia('(min-width: 1000px)');
+  function syncHow() { how.open = wide.matches; }
+  syncHow(); wide.addEventListener('change', syncHow);
+
+  function post(p, i, wkNo) {
+    const a = document.createElement('article'); a.className = 'post';
+    const w = document.createElement('div'); w.className = 'who';
+    const av = document.createElement('div'); av.className = 'av'; av.setAttribute('aria-hidden', 'true');
+    av.style.background = COLORS[i % COLORS.length];
+    const name = (p.name || '').trim() || 'Anonymous';
+    av.textContent = p.name && p.name.trim() ? name.charAt(0).toUpperCase() : '·';
+    const b = document.createElement('b'); b.textContent = name;
+    w.appendChild(av); w.appendChild(b);
+    if (p.when) { const wh = document.createElement('span'); wh.className = 'when'; wh.textContent = p.when; w.appendChild(wh); }
+    const t = document.createElement('p'); t.textContent = p.text;
+    a.appendChild(w); a.appendChild(t);
+    const f = document.createElement('div'); f.className = 'foot';
+    const tg = document.createElement('span'); tg.className = 'tags';
+    if (p.tags && p.tags.length) tg.textContent = p.tags.map(x => '#' + String(x).replace(/^#/, '')).join('  ');
+    f.appendChild(tg);
+    const h = document.createElement('button'); h.type = 'button'; h.className = 'heart'; h.hidden = true;
+    h.dataset.id = String(p.id || ('w' + wkNo + '-' + (i + 1))).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40);
+    h.dataset.n = '0'; h.setAttribute('aria-pressed', 'false');
+    f.appendChild(h);
+    f.hidden = !(p.tags && p.tags.length);
+    a.appendChild(f);
+    return a;
+  }
+
+  // "This stayed with me" hearts. They only appear once the counter (api/like.js) is set up.
+  function likedSet() { try { return new Set(JSON.parse(localStorage.getItem('ttl_liked') || '[]')); } catch (e) { return new Set(); } }
+  function saveLiked(set) { try { localStorage.setItem('ttl_liked', JSON.stringify([...set])); } catch (e) {} }
+  function paint(btn) {
+    const n = parseInt(btn.dataset.n, 10) || 0;
+    const on = likedSet().has(btn.dataset.id);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.textContent = '';
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '18'); svg.setAttribute('height', '18'); svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z');
+    svg.appendChild(path); btn.appendChild(svg);
+    btn.appendChild(document.createTextNode('This stayed with me' + (n > 0 ? ' · ' + n : '')));
+  }
+  async function hydrate(root) {
+    const btns = [...root.querySelectorAll('button.heart')];
+    if (!btns.length) return;
+    try {
+      const r = await fetch('/api/like?ids=' + encodeURIComponent(btns.map(x => x.dataset.id).join(',')));
+      if (!r.ok) throw new Error('off');
+      const data = await r.json();
+      btns.forEach(btn => {
+        btn.dataset.n = String((data.counts || {})[btn.dataset.id] || 0);
+        paint(btn); btn.hidden = false; btn.closest('.foot').hidden = false;
+        btn.addEventListener('click', async () => {
+          const set = likedSet(), id = btn.dataset.id, was = set.has(id);
+          const before = parseInt(btn.dataset.n, 10) || 0;
+          if (was) set.delete(id); else set.add(id);
+          saveLiked(set); btn.dataset.n = String(Math.max(0, before + (was ? -1 : 1))); paint(btn);
+          try {
+            const res = await fetch('/api/like', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: was ? 'unlike' : 'like' }) });
+            if (!res.ok) throw new Error('bad');
+            const out = await res.json(); btn.dataset.n = String(out.count); paint(btn);
+          } catch (e) {
+            const s2 = likedSet(); if (was) s2.add(id); else s2.delete(id); saveLiked(s2);
+            btn.dataset.n = String(before); paint(btn);
+          }
+        });
+      });
+    } catch (e) { /* counter not set up yet: hearts stay hidden */ }
+  }
+
+  function setPrompt(text) {
+    const h = $('wPrompt'); h.textContent = '';
+    h.appendChild(document.createTextNode(text));
+  }
+
+  function render(data) {
+    const open = data.state === 'open';
+    $('wLabel').textContent = 'Week ' + data.week + ' · ' + data.label;
+    $('wTag').textContent = open ? 'Open for writing' : 'Now reading';
+    $('wNo').textContent = data.week;
+    $('wDates').textContent = data.label + (open ? ' · closes Saturday' : ' · closed');
+    setPrompt(data.prompt);
+    if (data.note) { $('wNote').textContent = data.note; $('wNote').hidden = false; }
+
+    if (open) {
+      $('openBlock').hidden = false;
+      $('fWeek').value = data.week; $('fPrompt').value = data.prompt;
+      $('fSubject').value = 'New journal response (week ' + data.week + ')';
+    } else {
+      $('readBlock').hidden = false;
+      const list = $('readList'), rs = data.responses || [];
+      $('readSub').textContent = rs.length + (rs.length === 1 ? ' answer' : ' answers');
+      if (!rs.length) {
+        const q = document.createElement('p'); q.className = 'quiet'; q.textContent = 'Answers will be shared here soon.'; list.appendChild(q);
+      } else { rs.forEach((r, i) => list.appendChild(post(r, i, data.week))); hydrate(list); }
+      if (data.nextOpens) { const n = $('nextLine'); n.textContent = 'The next prompt opens ' + data.nextOpens + '.'; n.hidden = false; }
+    }
+
+    const archive = (data.archive || []).slice(0, 8);
+    if (archive.length) {
+      $('pastBlock').hidden = false;
+      const grid = $('pastList'), panel = $('pastPanel');
+      archive.forEach((wk, idx) => {
+        const btn = document.createElement('button'); btn.type = 'button'; btn.setAttribute('aria-expanded', 'false');
+        const sq = document.createElement('span'); sq.className = 'sq'; sq.style.background = COLORS[idx % COLORS.length]; sq.textContent = wk.week;
+        btn.appendChild(sq); btn.appendChild(document.createTextNode(wk.short || 'Week ' + wk.week));
+        btn.addEventListener('click', () => {
+          const was = btn.getAttribute('aria-expanded') === 'true';
+          grid.querySelectorAll('button').forEach(x => x.setAttribute('aria-expanded', 'false'));
+          panel.textContent = '';
+          if (was) { panel.hidden = true; return; }
+          btn.setAttribute('aria-expanded', 'true'); panel.hidden = false;
+          const h = document.createElement('h3');
+          const k = document.createElement('span'); k.className = 'wk'; k.textContent = 'Week ' + wk.week + ' · ' + wk.label;
+          h.appendChild(k); h.appendChild(document.createTextNode(wk.prompt)); panel.appendChild(h);
+          const rs = wk.responses || [];
+          if (!rs.length) { const q = document.createElement('p'); q.className = 'quiet'; q.textContent = 'No answers were shared this week.'; panel.appendChild(q); }
+          rs.forEach((r, i) => panel.appendChild(post(r, i, wk.week)));
+          hydrate(panel);
+        });
+        grid.appendChild(btn);
+      });
+    }
+  }
+
+  fetch('responses.json?v=' + Date.now())
+    .then(r => { if (!r.ok) throw new Error('missing'); return r.json(); })
+    .then(render)
+    .catch(() => { $('wPrompt').textContent = 'A new prompt is coming soon.'; });
+
+  // answer form
+  const form = $('wForm'), ta = $('response'), first = $('first'), statusEl = $('wstatus'), send = $('wsend');
+  function sync() {
+    const anon = form.querySelector('input[name="credit"]:checked').value === 'Anonymous';
+    $('nameline').hidden = anon;
+    $('wcount').textContent = ta.value.length.toLocaleString('en-US') + ' / 1,200';
+  }
+  ta.addEventListener('input', sync);
+  form.querySelectorAll('input[name="credit"]').forEach(r => r.addEventListener('change', sync));
+  sync();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); statusEl.className = 'status';
+    const anon = form.querySelector('input[name="credit"]:checked').value === 'Anonymous';
+    if (ta.value.trim().length < 10) { statusEl.className = 'status err'; statusEl.textContent = 'Please write a little more.'; ta.focus(); return; }
+    if (!anon && !first.value.trim()) { statusEl.className = 'status err'; statusEl.textContent = 'Add a name to show (a pseudonym is fine), or choose Anonymous.'; first.focus(); return; }
+    send.disabled = true; statusEl.textContent = 'Sending…';
+    try {
+      const res = await fetch(RESPONSE_ENDPOINT, { method: 'POST', headers: { 'Accept': 'application/json' }, body: new FormData(form) });
+      if (!res.ok) throw new Error('bad');
+      const answer = ta.value.trim(), promptText = $('fPrompt').value, mailTo = $('wemail').value.trim();
+      const body = promptText + '\n\n' + answer + '\n\n(from to truly live)';
+      $('mailCopy').href = 'mailto:' + encodeURIComponent(mailTo).replace('%40', '@') + '?subject=' + encodeURIComponent('My answer: ' + promptText) + '&body=' + encodeURIComponent(body);
+      $('copyBtn').addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(body); $('copyBtn').textContent = 'Copied'; } catch (e) { $('copyBtn').textContent = 'Try the email button instead'; }
+      });
+      $('copyRow').hidden = false;
+      form.hidden = true; const t = $('wthanks'); t.hidden = false; t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (err) {
+      send.disabled = false; statusEl.className = 'status err';
+      statusEl.textContent = "That didn't send. Your answer is still here, so please try again.";
+    }
+  });
+
+  // prompt email list
+  const pForm = $('pForm'), pEmail = $('pemail'), pStatus = $('pstatus');
+  pForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); pStatus.className = 'status';
+    const v = pEmail.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) { pStatus.className = 'status err'; pStatus.textContent = 'That email address looks incomplete.'; pEmail.focus(); return; }
+    try {
+      const res = await fetch(PROMPT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ email: v, form_type: 'journal_prompt_list', _subject: 'New journal prompt signup' }) });
+      if (!res.ok) throw new Error('bad');
+      pStatus.textContent = "You're on the list."; pEmail.value = '';
+    } catch (err) { pStatus.className = 'status err'; pStatus.textContent = "That didn't send. Please try again."; }
+  });
+</script>
+</body>
+</html>
