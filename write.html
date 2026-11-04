@@ -195,6 +195,15 @@
   .cstatus.err { color: #FFD6D6; }
   .cthanks { font-family: var(--serif); font-size: 1.3rem; margin-top: 0.5rem; }
   .hp { position: absolute; left: -9999px; }
+  .pshare { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.1rem; min-height: 44px; padding: 0.55rem 1rem; background: transparent; color: var(--on-dark); border: 2px solid var(--on-dark); font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+  .pshare:hover { background: var(--on-dark); color: var(--cobalt); }
+  .pshare-status { font-size: 0.88rem; margin-top: 0.4rem; min-height: 1.2em; }
+  .invite { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(243,236,224,.4); }
+  .invite-t { font-family: var(--serif); font-size: 1.25rem; line-height: 1.3; }
+  .post .acts { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+  .ashare { display: inline-flex; align-items: center; gap: 0.4rem; border: 0; background: none; font-size: 0.95rem; color: var(--ink); padding: 0.55rem 0.2rem; min-height: 44px; cursor: pointer; }
+  .ashare:hover { color: var(--cobalt); }
+  .post.flash { outline: 3px solid var(--cobalt); outline-offset: 3px; }
 </style>
 </head>
 <body>
@@ -216,6 +225,8 @@
       <div class="eyebrow"><span id="wLabel"></span><span class="tag" id="wTag"></span></div>
       <h1 id="wPrompt"></h1>
       <p class="note" id="wNote" hidden></p>
+      <button type="button" class="pshare" id="promptShare"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>Share this week's prompt</button>
+      <p class="pshare-status" id="promptShareStatus" role="status" aria-live="polite"></p>
     </section>
 
     <section id="openBlock" hidden>
@@ -255,6 +266,11 @@
         <div id="copyRow" style="display:grid;gap:0.6rem;margin-top:1.25rem" hidden>
           <a class="btn" id="mailCopy" href="#" style="background:var(--paper);color:var(--ink);border-color:var(--ink);text-align:center;text-decoration:none;margin-top:0;display:block;width:100%;line-height:1.4">Email me a copy of my answer</a>
           <button class="btn" type="button" id="copyBtn" style="background:transparent;color:var(--on-dark);border-color:var(--on-dark);margin-top:0">Copy my answer</button>
+        </div>
+        <div class="invite">
+          <p class="invite-t">Know someone who'd answer this differently? Send it to her.</p>
+          <button type="button" class="btn" id="thanksShare" style="background:var(--paper);color:var(--ink);border-color:var(--ink);margin-top:0.75rem">Send her the prompt</button>
+          <p class="pshare-status" id="thanksShareStatus" role="status" aria-live="polite"></p>
         </div>
       </div>
     </section>
@@ -354,6 +370,105 @@
   function syncHow() { how.open = wide.matches; }
   syncHow(); wide.addEventListener('change', syncHow);
 
+
+  // ---------- sharing ----------
+  const SITE = location.origin + location.pathname;
+  async function shareLink(opts, statusEl) {
+    try {
+      if (navigator.share) { await navigator.share(opts); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(opts.url); statusEl.textContent = 'Link copied. Paste it anywhere.'; }
+    catch (e) { statusEl.textContent = opts.url; }
+  }
+  function sharePrompt(statusEl) {
+    return shareLink({ title: 'to truly live', text: "This week's prompt on to truly live. Come write with me.", url: SITE }, statusEl);
+  }
+
+  function wrapLines(ctx, text, maxW) {
+    const out = [];
+    String(text).split(/\n+/).forEach(par => {
+      let line = '';
+      par.split(/\s+/).forEach(word => {
+        const test = line ? line + ' ' + word : word;
+        if (ctx.measureText(test).width > maxW && line) { out.push(line); line = word; } else line = test;
+      });
+      if (line) out.push(line);
+    });
+    return out;
+  }
+  let LOGO = null;
+  function loadLogo() {
+    if (LOGO) return Promise.resolve(LOGO);
+    return new Promise(res => { const im = new Image(); im.onload = () => { LOGO = im; res(im); }; im.onerror = () => res(null); im.src = 'logo-light.png'; });
+  }
+  async function answerCard(p, wkNo) {
+    try { await Promise.all([document.fonts.load('700 60px Fraunces'), document.fonts.load('400 40px Fraunces'), document.fonts.load('600 30px "Instrument Sans"')]); } catch (e) {}
+    const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.fillStyle = '#FAF6EE'; x.fillRect(0, 0, W, H);
+    x.fillStyle = '#E4D9C6'; for (let i = 13; i < W; i += 26) for (let j = 13; j < H; j += 26) { x.beginPath(); x.arc(i, j, 2, 0, 7); x.fill(); }
+    // header
+    x.fillStyle = '#38281F'; x.fillRect(0, 0, W, 110);
+    const logo = await loadLogo();
+    if (logo) { const lh = 44, lw = logo.width * lh / logo.height; x.drawImage(logo, 64, 33, lw, lh); }
+    x.fillStyle = '#F3ECE0'; x.font = '600 24px "Instrument Sans", sans-serif'; x.textAlign = 'right';
+    x.fillText('WEEK ' + wkNo, W - 64, 64); x.textAlign = 'left';
+    // card
+    const cx = 64, cy = 190, cw = W - 128, ch = H - 190 - 210;
+    x.fillStyle = '#38281F'; x.fillRect(cx + 14, cy + 14, cw, ch);
+    x.fillStyle = '#2F45B5'; x.fillRect(cx, cy, cw, ch);
+    x.strokeStyle = '#38281F'; x.lineWidth = 3; x.strokeRect(cx, cy, cw, ch);
+    // text, sized to fit
+    const pad = 64, maxW = cw - pad * 2, maxH = ch - pad * 2 - 90;
+    let size = 64, lines;
+    for (; size >= 26; size -= 2) {
+      x.font = '400 ' + size + 'px Fraunces, Georgia, serif';
+      lines = wrapLines(x, p.text, maxW);
+      if (lines.length * size * 1.35 <= maxH) break;
+    }
+    const lh = size * 1.35;
+    if (lines.length * lh > maxH) { const keep = Math.floor(maxH / lh); lines = lines.slice(0, keep); lines[keep - 1] = lines[keep - 1].replace(/\s+\S*$/, '') + '…'; }
+    x.fillStyle = '#F3ECE0';
+    let ty = cy + pad + size;
+    lines.forEach(l => { x.fillText(l, cx + pad, ty); ty += lh; });
+    x.font = '600 30px "Instrument Sans", sans-serif'; x.fillStyle = '#D3D8F2';
+    x.fillText('— ' + ((p.name || '').trim() || 'Anonymous'), cx + pad, cy + ch - pad);
+    // footer
+    x.fillStyle = '#38281F'; x.font = '700 40px Fraunces, Georgia, serif';
+    x.fillText('a place for women to just be.', 64, H - 112);
+    x.font = '500 28px "Instrument Sans", sans-serif'; x.fillStyle = '#5E5347';
+    x.fillText('read more at totrulylive.ca', 64, H - 64);
+    return new Promise(res => c.toBlob(res, 'image/png'));
+  }
+  async function shareAnswer(p, wkNo, anchor, btn) {
+    const url = SITE + '#' + anchor;
+    const label = btn.lastChild; const old = label.textContent; label.textContent = 'making card…';
+    try {
+      const blob = await answerCard(p, wkNo);
+      const file = new File([blob], 'to-truly-live-week-' + wkNo + '.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: 'to truly live', text: 'From this week on to truly live: ' + url }); }
+        catch (e) { if (!(e && e.name === 'AbortError')) throw e; }
+      } else {
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        try { await navigator.clipboard.writeText(url); label.textContent = 'saved + link copied'; setTimeout(() => { label.textContent = old; }, 2500); return; } catch (e) {}
+      }
+    } catch (e) {
+      try { await navigator.clipboard.writeText(url); label.textContent = 'link copied'; setTimeout(() => { label.textContent = old; }, 2500); return; } catch (e2) {}
+    }
+    label.textContent = old;
+  }
+  function focusShared() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!/^a-[a-z0-9-]+$/.test(id)) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('flash'); el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => el.classList.remove('flash'), 3000);
+  }
+  $('promptShare').addEventListener('click', () => sharePrompt($('promptShareStatus')));
+  $('thanksShare').addEventListener('click', () => sharePrompt($('thanksShareStatus')));
+
   function post(p, i, wkNo) {
     const a = document.createElement('article'); a.className = 'post';
     const w = document.createElement('div'); w.className = 'who';
@@ -373,8 +488,13 @@
     const h = document.createElement('button'); h.type = 'button'; h.className = 'heart'; h.hidden = true;
     h.dataset.id = String(p.id || ('w' + wkNo + '-' + (i + 1))).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40);
     h.dataset.n = '0'; h.setAttribute('aria-pressed', 'false');
-    f.appendChild(h);
-    f.hidden = !(p.tags && p.tags.length);
+    a.id = 'a-' + h.dataset.id;
+    const acts = document.createElement('div'); acts.className = 'acts';
+    const sh = document.createElement('button'); sh.type = 'button'; sh.className = 'ashare';
+    sh.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>share';
+    sh.addEventListener('click', () => shareAnswer(p, wkNo, a.id, sh));
+    acts.appendChild(sh); acts.appendChild(h);
+    f.appendChild(acts);
     a.appendChild(f);
     return a;
   }
@@ -446,7 +566,7 @@
       $('readSub').textContent = rs.length + (rs.length === 1 ? ' answer' : ' answers');
       if (!rs.length) {
         const q = document.createElement('p'); q.className = 'quiet'; q.textContent = 'Answers will be shared here soon.'; list.appendChild(q);
-      } else { rs.forEach((r, i) => list.appendChild(post(r, i, data.week))); hydrate(list); }
+      } else { rs.forEach((r, i) => list.appendChild(post(r, i, data.week))); hydrate(list); focusShared(); }
       if (data.nextOpens) { const n = $('nextLine'); n.textContent = 'The next prompt opens ' + data.nextOpens + '.'; n.hidden = false; }
     }
 
