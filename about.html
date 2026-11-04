@@ -214,6 +214,12 @@
   .credit a { color: inherit; text-decoration: underline; }
   .logo-img { display: block; height: 1.5rem; width: auto; }
   footer .logo-img { height: 2rem; }
+  .fbottom { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
+  .fbottom .copy { margin-top: 0; }
+  .fbottom .fright { display: flex; align-items: center; gap: 1rem; flex: none; }
+  .ig { display: flex; color: var(--on-dark-muted); padding: 0.4rem; }
+  .ig:hover { color: var(--on-dark); }
+  .ttl-mark { width: 40px; height: 40px; display: block; }
 </style>
 </head>
 <body id="top">
@@ -265,9 +271,11 @@
     <ul>
       <li><a href="write.html">Write</a></li>
       <li><a href="about.html" aria-current="page">More</a></li>
-      <li><a href="https://www.instagram.com/totrulylive/" target="_blank" rel="noopener">Instagram @totrulylive</a></li>
     </ul>
-    <p class="copy">© 2026 to truly live. All rights reserved. Photography is illustrative and does not depict story authors.</p>
+    <div class="fbottom">
+      <p class="copy">© 2026 to truly live. All rights reserved. Photography is illustrative and does not depict story authors.</p>
+      <div class="fright"><a class="ig" href="https://www.instagram.com/totrulylive/" target="_blank" rel="noopener" aria-label="to truly live on Instagram"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><img class="ttl-mark" src="ttl-mark.png" alt=""></div>
+    </div>
   </div>
 </footer>
 
