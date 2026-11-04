@@ -378,7 +378,7 @@
     return a;
   }
 
-  // "This stayed with me" hearts. They only appear once the counter (api/like.js) is set up.
+  // "felt this" hearts. They only appear once the counter (api/like.js) is set up.
   function likedSet() { try { return new Set(JSON.parse(localStorage.getItem('ttl_liked') || '[]')); } catch (e) { return new Set(); } }
   function saveLiked(set) { try { localStorage.setItem('ttl_liked', JSON.stringify([...set])); } catch (e) {} }
   function paint(btn) {
@@ -391,7 +391,7 @@
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', 'M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z');
     svg.appendChild(path); btn.appendChild(svg);
-    btn.appendChild(document.createTextNode('This stayed with me' + (n > 0 ? ' · ' + n : '')));
+    btn.appendChild(document.createTextNode('felt this' + (n > 0 ? ' · ' + n : '')));
   }
   async function hydrate(root) {
     const btns = [...root.querySelectorAll('button.heart')];
