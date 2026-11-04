@@ -38,7 +38,11 @@ module.exports = async (req, res) => {
       if (a.text.length < 10) return res.status(400).json({ error: 'too short' });
       if (!anon && !a.name) return res.status(400).json({ error: 'name needed' });
       if (a.email && !EMAIL.test(a.email)) a.email = '';
+      if (!anon && !a.email) return res.status(400).json({ error: 'email needed' });
+      a.optin = b.optin === true && Boolean(a.email);
       await L.redis(['RPUSH', 'subs:' + site.week, JSON.stringify(a)]);
+      // consent record for the weekly email (CASL): who, when, and what they agreed to
+      if (a.optin) await L.redis(['RPUSH', 'optins', JSON.stringify({ email: a.email, at: now, week: site.week, consent: 'Ticked "Also send me the weekly prompt" on the answer form' })]);
       return res.status(200).json({ ok: true });
     }
 

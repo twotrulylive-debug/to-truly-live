@@ -43,8 +43,10 @@ module.exports = async (req, res) => {
       const mod = (await L.getJSON('mod:' + site.week, {})) || {};
       const contactsRaw = (await L.redis(['LRANGE', 'contacts', 0, 199])) || [];
       const contacts = contactsRaw.map((x) => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean);
+      const optRaw = (await L.redis(['LRANGE', 'optins', 0, -1])) || [];
+      const optins = optRaw.map((x) => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean);
       const archive = await L.getJSON('archive', []);
-      return res.status(200).json({ site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length });
+      return res.status(200).json({ optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length });
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
 

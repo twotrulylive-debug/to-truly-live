@@ -74,7 +74,7 @@
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="answers" aria-selected="true">Answers</button>
       <button role="tab" data-tab="newweek" aria-selected="false">New week</button>
-      <button role="tab" data-tab="messages" aria-selected="false">Messages</button>
+      <button role="tab" data-tab="messages" aria-selected="false">Messages &amp; sign-ups</button>
     </div>
 
     <div id="tab-answers">
@@ -125,6 +125,12 @@
         <h2>Contact messages</h2>
         <div id="msgList"></div>
       </div>
+      <div class="box">
+        <h2>Weekly email sign-ups</h2>
+        <p class="muted" id="optCount"></p>
+        <p class="muted" style="margin-top:0.4rem">People who ticked "Also send me the weekly prompt". Download the list and import it in Substack (Subscribers, then Import). Keep the file: it's your record of their permission.</p>
+        <button class="btn" type="button" id="exportOpt">Download list (CSV)</button>
+      </div>
     </div>
   </section>
 </main>
@@ -165,6 +171,7 @@
       const row = el('div', 'ans');
       row.appendChild(el('div', 'who', a.name || 'Anonymous'));
       row.appendChild(el('div', 'meta', when(a.at) + (a.email ? ' · ' + a.email : '')));
+      if (a.optin) { const tg = el('span', 'pill', 'wants the emails'); tg.style.cssText = 'margin-top:0.35rem;color:var(--cobalt)'; row.appendChild(tg); }
       row.appendChild(el('p', 't', a.text));
       const c = el('div', 'choices');
       [['publish', 'Publish', 'pub'], ['skip', 'Skip', 'skip']].forEach(([st, label, cls]) => {
@@ -178,6 +185,8 @@
       row.appendChild(c); list.appendChild(row);
     });
 
+    const seen = new Set(); const opt = (DATA.optins || []).filter(o => { const k = String(o.email).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+    $('optCount').textContent = opt.length + (opt.length === 1 ? ' person' : ' people') + ' so far';
     const ml = $('msgList'); ml.textContent = '';
     const msgs = DATA.contacts || [];
     if (!msgs.length) ml.appendChild(el('p', 'muted', 'No messages yet.'));
@@ -208,6 +217,12 @@
       $('loginStatus').className = 'status err';
       $('loginStatus').textContent = err.status === 503 ? 'The admin isn\'t set up yet (database or password missing in Vercel).' : err.message === 'wrong password' ? 'That password isn\'t right.' : err.message;
     }
+  });
+  $('exportOpt').addEventListener('click', () => {
+    const seen = new Set(); const rows = [['email', 'opted_in_at', 'week', 'consent']];
+    (DATA.optins || []).forEach(o => { const k = String(o.email).toLowerCase(); if (seen.has(k)) return; seen.add(k); rows.push([o.email, o.at, o.week, o.consent]); });
+    const csv = rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'to-truly-live-signups.csv'; document.body.appendChild(a); a.click(); a.remove();
   });
   $('logout').addEventListener('click', () => { try { sessionStorage.removeItem('ttl_admin'); } catch (e) {} location.reload(); });
 
