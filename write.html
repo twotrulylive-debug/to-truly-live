@@ -195,7 +195,8 @@
   .cstatus.err { color: #FFD6D6; }
   .cthanks { font-family: var(--serif); font-size: 1.3rem; margin-top: 0.5rem; }
   .hp { position: absolute; left: -9999px; }
-  .pshare { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.1rem; min-height: 44px; padding: 0.55rem 1rem; background: transparent; color: var(--on-dark); border: 2px solid var(--on-dark); font-weight: 600; font-size: 0.95rem; cursor: pointer; }
+  .pshare { display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.9rem; min-height: 32px; padding: 0.25rem 0.65rem; background: transparent; color: var(--on-dark); border: 1.5px solid rgba(243,236,224,.7); font-weight: 600; font-size: 0.8rem; cursor: pointer; }
+  .pshare svg { width: 14px; height: 14px; }
   .pshare:hover { background: var(--on-dark); color: var(--cobalt); }
   .pshare-status { font-size: 0.88rem; margin-top: 0.4rem; min-height: 1.2em; }
   .invite { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(243,236,224,.4); }
@@ -227,7 +228,7 @@
       <div class="eyebrow"><span id="wLabel"></span><span class="tag" id="wTag"></span></div>
       <h1 id="wPrompt"></h1>
       <p class="note" id="wNote" hidden></p>
-      <button type="button" class="pshare" id="promptShare"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>Share this week's prompt</button>
+      <button type="button" class="pshare" id="promptShare"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"/></svg>share prompt</button>
       <p class="pshare-status" id="promptShareStatus" role="status" aria-live="polite"></p>
     </section>
 
