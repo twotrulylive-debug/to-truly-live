@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
 
     if (b.type === 'answer') {
       const site = await L.getSite();
-      if (site.state !== 'open') return res.status(409).json({ error: 'closed' });
+      if (site.state !== 'open' || L.closedNow(site)) return res.status(409).json({ error: 'closed' });
       const anon = b.credit === 'Anonymous';
       const a = {
         id: L.newId(), at: now, week: site.week,

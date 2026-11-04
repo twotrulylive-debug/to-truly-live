@@ -275,6 +275,14 @@
       </div>
     </section>
 
+    <section id="closedBlock" hidden>
+      <div class="thanks">
+        <h2>This week is closed.</h2>
+        <p>Answers are being read. Come back soon to read what women wrote.</p>
+        <p style="margin-top:0.9rem;opacity:.85">The next prompt opens Wednesday.</p>
+      </div>
+    </section>
+
     <section id="readBlock" hidden>
       <div class="rhead"><h2>Read along</h2><span id="readSub"></span></div>
       <div id="readList" style="display:grid;gap:1.25rem;margin-top:1.25rem"></div>
@@ -549,15 +557,18 @@
 
   function render(data) {
     const open = data.state === 'open';
+    const closed = data.state === 'closed';
     window.__ttlOpen = open;
     $('wLabel').textContent = 'Week ' + data.week + ' · ' + data.label;
-    $('wTag').textContent = open ? 'Open for writing' : 'Now reading';
+    $('wTag').textContent = open ? 'Open for writing' : closed ? 'Closed' : 'Now reading';
     $('wNo').textContent = data.week;
     $('wDates').textContent = data.label + (open ? ' · closes Saturday' : ' · closed');
     setPrompt(data.prompt);
     if (data.note) { $('wNote').textContent = data.note; $('wNote').hidden = false; }
 
-    if (open) {
+    if (closed) {
+      $('closedBlock').hidden = false;
+    } else if (open) {
       $('openBlock').hidden = false;
       $('fWeek').value = data.week; $('fPrompt').value = data.prompt;
       $('fSubject').value = 'New journal response (week ' + data.week + ')';
@@ -625,6 +636,7 @@
       const fd = new FormData(form);
       let res = await fetch('/api/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'answer', response: fd.get('response'), credit: fd.get('credit'), display_name: fd.get('display_name'), email: fd.get('email'), _gotcha: fd.get('_gotcha') }) });
       if (res.status === 503 || res.status === 404) res = await fetch(RESPONSE_ENDPOINT, { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd });
+      if (res.status === 409) { send.disabled = false; statusEl.className = 'status err'; statusEl.textContent = 'This week just closed. Come back Wednesday for the next prompt.'; return; }
       if (!res.ok) throw new Error('bad');
       const answer = ta.value.trim(), promptText = $('fPrompt').value, mailTo = $('wemail').value.trim();
       const body = promptText + '\n\n' + answer + '\n\n(from to truly live)';

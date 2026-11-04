@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     const published = site.state === 'reading' ? await L.getJSON('pub:' + site.week, []) : [];
     const archive = await L.getJSON('archive', []);
     return res.status(200).json({
-      state: site.state, week: site.week, label: site.label, prompt: site.prompt,
+      state: L.closedNow(site) ? 'closed' : site.state, week: site.week, label: site.label, prompt: site.prompt,
       note: site.note || '', nextOpens: site.nextOpens || 'Wednesday',
       responses: published, archive
     });

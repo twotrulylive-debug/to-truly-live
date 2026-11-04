@@ -63,4 +63,24 @@ async function getSite() {
   return DEFAULT_SITE;
 }
 
-module.exports = { redis, getJSON, setJSON, limited, body, clean, safeEqual, newId, getSite, configured, ipOf };
+// Answers close at the end of Saturday, Toronto time. From Sunday to Tuesday the form stays
+// closed until the next week is opened. A week opened on (or after) the latest Sunday stays open,
+// so opening early on a Tuesday works too.
+function torontoDate(d) {
+  const p = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' }).formatToParts(d);
+  const g = (t) => (p.find((x) => x.type === t) || {}).value;
+  return { ymd: g('year') + '-' + g('month') + '-' + g('day'), day: g('weekday') };
+}
+function closedNow(site, now) {
+  if (!site || site.state !== 'open') return false;
+  now = now || new Date();
+  const t = torontoDate(now);
+  const idx = ['Sun', 'Mon', 'Tue'].indexOf(t.day);
+  if (idx < 0) return false;
+  const lastSunday = new Date(t.ymd + 'T12:00:00Z'); lastSunday.setUTCDate(lastSunday.getUTCDate() - idx);
+  const lastSundayYmd = lastSunday.toISOString().slice(0, 10);
+  const opened = torontoDate(new Date(site.openedAt || '2026-11-04T12:00:00Z')).ymd;
+  return opened < lastSundayYmd;
+}
+
+module.exports = { closedNow, redis, getJSON, setJSON, limited, body, clean, safeEqual, newId, getSite, configured, ipOf };

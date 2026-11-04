@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
       const contactsRaw = (await L.redis(['LRANGE', 'contacts', 0, 199])) || [];
       const contacts = contactsRaw.map((x) => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean);
       const archive = await L.getJSON('archive', []);
-      return res.status(200).json({ site, subs, mod, contacts, archiveCount: archive.length });
+      return res.status(200).json({ site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length });
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
 
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
     }
 
     if (b.action === 'reopen') {
-      site.state = 'open'; await L.setJSON('site', site);
+      site.state = 'open'; site.openedAt = new Date().toISOString(); await L.setJSON('site', site);
       return res.status(200).json({ ok: true, site });
     }
 
@@ -92,7 +92,7 @@ module.exports = async (req, res) => {
         short: L.clean(b.short, 24) || ('Week ' + site.week), responses: pub
       });
       await L.setJSON('archive', archive);
-      const next = { state: 'open', week: site.week + 1, label, prompt, note: L.clean(b.note, 400), nextOpens: 'Wednesday' };
+      const next = { state: 'open', week: site.week + 1, label, prompt, note: L.clean(b.note, 400), nextOpens: 'Wednesday', openedAt: new Date().toISOString() };
       await L.setJSON('site', next);
       return res.status(200).json({ ok: true, site: next });
     }

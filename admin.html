@@ -152,7 +152,7 @@
     const s = DATA.site;
     $('wkLine').textContent = 'Week ' + s.week + ' · ' + s.label;
     $('wkPrompt').textContent = s.prompt;
-    $('wkState').textContent = s.state === 'open' ? 'Open for writing' : 'Now reading';
+    $('wkState').textContent = s.state !== 'open' ? 'Now reading' : (DATA.closed ? 'Closed · waiting for Go live' : 'Open for writing');
     $('reopen').hidden = s.state === 'open';
     $('edPrompt').value = s.prompt; $('edNote').value = s.note || ''; $('edLabel').value = s.label;
 
