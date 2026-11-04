@@ -381,7 +381,7 @@
     catch (e) { statusEl.textContent = opts.url; }
   }
   function sharePrompt(statusEl) {
-    return shareLink({ title: 'to truly live', text: "Saw this and thought of you. Answer before Saturday.", url: SITE }, statusEl);
+    return shareLink({ title: 'to truly live', text: (window.__ttlOpen === false ? "Saw this and thought of you. Read what women wrote this week." : "Saw this and thought of you. Answer before Saturday."), url: SITE }, statusEl);
   }
 
   function wrapLines(ctx, text, maxW) {
@@ -549,6 +549,7 @@
 
   function render(data) {
     const open = data.state === 'open';
+    window.__ttlOpen = open;
     $('wLabel').textContent = 'Week ' + data.week + ' · ' + data.label;
     $('wTag').textContent = open ? 'Open for writing' : 'Now reading';
     $('wNo').textContent = data.week;
