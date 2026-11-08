@@ -1,7 +1,8 @@
 // Private admin actions. Every request needs the password in the "x-admin-password" header.
 // The password is set in Vercel as the environment variable ADMIN_PASSWORD.
 //
-// GET  /api/admin                      -> { site, subs, mod, contacts, archiveCount }
+// GET  /api/admin                      -> { site, subs, mod, contacts, archiveCount, weeks }
+// GET  /api/admin?week=N               -> one week's answers, marks and hearts (read-only)
 // POST /api/admin { action: "mark", id, status: "publish"|"skip"|"pending" }
 // POST /api/admin { action: "golive" }                 -> publish approved answers, page switches to "Now reading"
 // POST /api/admin { action: "reopen" }                 -> switch back to "Open for writing" (same week)
@@ -38,6 +39,21 @@ module.exports = async (req, res) => {
     if (!(await authed(req, res))) return;
     const site = await L.getSite();
 
+    // Read-only: one week's answers, marks and hearts, for the "All weeks" tab.
+    // GET /api/admin?week=1 -> { week, label, prompt, current, subs, mod, likes }
+    if (req.method === 'GET' && req.query && req.query.week != null) {
+      const w = parseInt(req.query.week, 10);
+      if (!(w >= 1 && w <= site.week)) return res.status(400).json({ error: 'no such week' });
+      const archive = await L.getJSON('archive', []);
+      const info = w === site.week ? site : (archive.find((a) => a.week === w) || { week: w, label: '', prompt: '' });
+      const subs = await loadSubs(w);
+      const mod = (await L.getJSON('mod:' + w, {})) || {};
+      const likeVals = subs.length ? (await L.redis(['MGET', ...subs.map((s) => 'like:w' + w + '-' + s.id)])) || [] : [];
+      const likes = {};
+      subs.forEach((s, i) => { likes[s.id] = Math.max(0, parseInt(likeVals[i] || '0', 10) || 0); });
+      return res.status(200).json({ week: w, label: info.label || '', prompt: info.prompt || '', current: w === site.week, subs, mod, likes });
+    }
+
     if (req.method === 'GET') {
       const subs = await loadSubs(site.week);
       const mod = (await L.getJSON('mod:' + site.week, {})) || {};
@@ -50,7 +66,9 @@ module.exports = async (req, res) => {
       const likeVals = likeIds.length ? (await L.redis(['MGET', ...likeIds.map((i) => 'like:' + i)])) || [] : [];
       const likes = {};
       subs.forEach((s, i) => { likes[s.id] = Math.max(0, parseInt(likeVals[i] || '0', 10) || 0); });
-      return res.status(200).json({ likes, optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length });
+      const weeks = [{ week: site.week, label: site.label, prompt: site.prompt }]
+        .concat(archive.map((a) => ({ week: a.week, label: a.label, prompt: a.prompt })));
+      return res.status(200).json({ likes, optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length, weeks });
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
 

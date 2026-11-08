@@ -46,6 +46,20 @@
   .status { margin-top: 0.75rem; font-weight: 500; min-height: 1.4em; }
   .err { color: #9B2C2C; }
   .pill { display: inline-block; border: 2px solid currentColor; padding: 0 0.55rem; font-size: 0.82rem; font-weight: 600; }
+  .wk { display: block; width: 100%; text-align: left; border: 0; border-top: 1px dashed var(--ink); background: none; font: inherit; color: inherit; padding: 0.9rem 0; cursor: pointer; }
+  .wk:first-child { border-top: 0; }
+  .wk .p { font-family: var(--serif); font-size: 1.15rem; margin-top: 0.15rem; }
+  .wk .go { color: var(--cobalt); font-weight: 600; font-size: 0.9rem; margin-top: 0.2rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 1.25rem; }
+  .stat { background: #fff; border: 2px solid var(--ink); padding: 0.75rem 0.9rem; }
+  .stat b { display: block; font-family: var(--serif); font-size: 1.8rem; line-height: 1.1; }
+  .stat span { font-size: 0.85rem; color: var(--muted); }
+  .sortby { display: flex; }
+  .sortby button { min-height: 38px; border: 2px solid var(--ink); background: var(--paper); font: inherit; font-size: 0.85rem; font-weight: 600; padding: 0.3rem 0.7rem; cursor: pointer; }
+  .sortby button + button { border-left: 0; }
+  .sortby button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .tag { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 0 0.45rem; border: 1.5px solid currentColor; margin-right: 0.35rem; margin-top: 0.3rem; }
+  .tag.pub { color: var(--cobalt); } .tag.skip { color: var(--muted); } .tag.none { color: var(--accent); }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -74,6 +88,7 @@
     <div class="tabs" role="tablist">
       <button role="tab" data-tab="answers" aria-selected="true">Answers</button>
       <button role="tab" data-tab="newweek" aria-selected="false">New week</button>
+      <button role="tab" data-tab="weeks" aria-selected="false">All weeks</button>
       <button role="tab" data-tab="messages" aria-selected="false">Messages &amp; sign-ups</button>
     </div>
 
@@ -118,6 +133,30 @@
         <button class="btn alt" type="submit">Save changes</button>
         <p class="status" id="editStatus" role="status"></p>
       </form>
+    </div>
+
+    <div id="tab-weeks" hidden>
+      <div class="box" id="wkPick">
+        <h2>All weeks</h2>
+        <p class="muted">Every prompt, with all its answers and how each one landed. Looking here never changes anything.</p>
+        <div id="wkList" style="margin-top:0.5rem"></div>
+      </div>
+      <div id="wkDetail" hidden>
+        <button class="btn alt" type="button" id="wkBack" style="margin-top:1.25rem">← All weeks</button>
+        <div class="box blue">
+          <p class="muted" id="wdLine"></p>
+          <h1 id="wdPrompt" style="margin-top:0.3rem;font-size:1.6rem"></h1>
+        </div>
+        <div class="stats" id="wdStats"></div>
+        <div class="box">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+            <h2 style="margin:0">Answers</h2>
+            <div class="sortby"><button type="button" data-sort="felt" aria-pressed="true">Most felt</button><button type="button" data-sort="time" aria-pressed="false">In order</button></div>
+          </div>
+          <div id="wdList" style="margin-top:0.5rem"></div>
+        </div>
+      </div>
+      <p class="status" id="wkStatus" role="status"></p>
     </div>
 
     <div id="tab-messages" hidden>
@@ -229,8 +268,70 @@
 
   document.querySelectorAll('[role=tab]').forEach(t => t.addEventListener('click', () => {
     document.querySelectorAll('[role=tab]').forEach(x => x.setAttribute('aria-selected', String(x === t)));
-    ['answers', 'newweek', 'messages'].forEach(n => { $('tab-' + n).hidden = n !== t.dataset.tab; });
+    ['answers', 'newweek', 'weeks', 'messages'].forEach(n => { $('tab-' + n).hidden = n !== t.dataset.tab; });
+    if (t.dataset.tab === 'weeks') showWeekList();
   }));
+
+  // ---- All weeks (read-only) ----
+  let WK = null, SORT = 'felt';
+  function showWeekList() {
+    $('wkDetail').hidden = true; $('wkPick').hidden = false; $('wkStatus').textContent = '';
+    const list = $('wkList'); list.textContent = '';
+    (DATA.weeks || []).forEach(w => {
+      const b = el('button', 'wk'); b.type = 'button';
+      b.appendChild(el('div', 'meta muted', 'Week ' + w.week + (w.label ? ' · ' + w.label : '') + (w.week === DATA.site.week ? ' · this week' : '')));
+      b.appendChild(el('div', 'p', w.prompt || '(no prompt saved)'));
+      b.appendChild(el('div', 'go', 'See answers and hearts →'));
+      b.addEventListener('click', () => openWeek(w.week));
+      list.appendChild(b);
+    });
+  }
+  async function openWeek(n) {
+    $('wkStatus').textContent = 'Loading…';
+    try {
+      const r = await fetch('/api/admin?week=' + n, { headers: { 'x-admin-password': PW } });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || ('error ' + r.status));
+      WK = j; $('wkStatus').textContent = '';
+      $('wkPick').hidden = true; $('wkDetail').hidden = false;
+      renderWeek(); window.scrollTo(0, 0);
+    } catch (e) { $('wkStatus').textContent = e.message; }
+  }
+  function renderWeek() {
+    const subs = WK.subs || [], mod = WK.mod || {}, likes = WK.likes || {};
+    $('wdLine').textContent = 'Week ' + WK.week + (WK.label ? ' · ' + WK.label : '') + (WK.current ? ' · this week' : '');
+    $('wdPrompt').textContent = WK.prompt;
+    const nPub = subs.filter(a => mod[a.id] === 'publish').length;
+    const nSkip = subs.filter(a => mod[a.id] === 'skip').length;
+    const hearts = subs.reduce((t, a) => t + (likes[a.id] || 0), 0);
+    const nOpt = subs.filter(a => a.optin).length;
+    const st = $('wdStats'); st.textContent = '';
+    [[subs.length, 'answers received'], [nPub, 'published'], [nSkip, 'skipped'], [hearts, '♥ felt this, in total'], [nOpt, 'wanted the emails']].forEach(([n, l]) => {
+      const d = el('div', 'stat'); d.appendChild(el('b', '', String(n))); d.appendChild(el('span', '', l)); st.appendChild(d);
+    });
+    document.querySelectorAll('.sortby button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sort === SORT)));
+    const rows = subs.slice();
+    if (SORT === 'felt') rows.sort((a, b) => (likes[b.id] || 0) - (likes[a.id] || 0));
+    const list = $('wdList'); list.textContent = '';
+    if (!rows.length) list.appendChild(el('p', 'muted', 'No answers this week.'));
+    rows.forEach(a => {
+      const row = el('div', 'ans');
+      row.appendChild(el('div', 'who', a.name || 'Anonymous'));
+      row.appendChild(el('div', 'meta', when(a.at) + (a.email ? ' · ' + a.email : '')));
+      const m = mod[a.id];
+      const tags = el('div');
+      tags.appendChild(el('span', 'tag ' + (m === 'publish' ? 'pub' : m === 'skip' ? 'skip' : 'none'), m === 'publish' ? 'Published' : m === 'skip' ? 'Skipped' : 'Not marked'));
+      if (a.optin) tags.appendChild(el('span', 'tag pub', 'wants the emails'));
+      row.appendChild(tags);
+      const lk = el('div', 'meta', '♥ ' + (likes[a.id] || 0) + ' felt this');
+      if (likes[a.id]) { lk.style.color = 'var(--cobalt)'; lk.style.fontWeight = '600'; }
+      row.appendChild(lk);
+      row.appendChild(el('p', 't', a.text));
+      list.appendChild(row);
+    });
+  }
+  $('wkBack').addEventListener('click', showWeekList);
+  document.querySelectorAll('.sortby button').forEach(b => b.addEventListener('click', () => { SORT = b.dataset.sort; renderWeek(); }));
 
   $('goLive').addEventListener('click', async () => {
     const n = (DATA.subs || []).filter(a => DATA.mod[a.id] === 'publish').length;
