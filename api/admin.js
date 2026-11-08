@@ -46,7 +46,11 @@ module.exports = async (req, res) => {
       const optRaw = (await L.redis(['LRANGE', 'optins', 0, -1])) || [];
       const optins = optRaw.map((x) => { try { return JSON.parse(x); } catch (e) { return null; } }).filter(Boolean);
       const archive = await L.getJSON('archive', []);
-      return res.status(200).json({ optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length });
+      const likeIds = subs.map((s) => 'w' + site.week + '-' + s.id);
+      const likeVals = likeIds.length ? (await L.redis(['MGET', ...likeIds.map((i) => 'like:' + i)])) || [] : [];
+      const likes = {};
+      subs.forEach((s, i) => { likes[s.id] = Math.max(0, parseInt(likeVals[i] || '0', 10) || 0); });
+      return res.status(200).json({ likes, optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length });
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
 

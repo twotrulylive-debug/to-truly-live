@@ -171,6 +171,7 @@
       const row = el('div', 'ans');
       row.appendChild(el('div', 'who', a.name || 'Anonymous'));
       row.appendChild(el('div', 'meta', when(a.at) + (a.email ? ' · ' + a.email : '')));
+      if (DATA.likes && DATA.likes[a.id]) { const lk = el('div', 'meta', '♥ ' + DATA.likes[a.id] + ' felt this'); lk.style.color = 'var(--cobalt)'; lk.style.fontWeight = '600'; row.appendChild(lk); }
       if (a.optin) { const tg = el('span', 'pill', 'wants the emails'); tg.style.cssText = 'margin-top:0.35rem;color:var(--cobalt)'; row.appendChild(tg); }
       row.appendChild(el('p', 't', a.text));
       const c = el('div', 'choices');

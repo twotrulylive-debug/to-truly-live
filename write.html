@@ -207,6 +207,9 @@
   .post.flash { outline: 3px solid var(--cobalt); outline-offset: 3px; }
   .optin { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.9rem; font-size: 0.98rem; font-weight: 500; cursor: pointer; min-height: 44px; }
   .optin input { width: 22px; height: 22px; accent-color: var(--cobalt); flex: none; }
+  .felt-total { font-family: var(--serif); font-size: 1.1rem; line-height: 1.4; padding: 0.75rem 0.9rem; background: var(--cream); border: 2px solid var(--ink); }
+  .felt-total span { color: var(--cobalt); }
+  .felt-total[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -524,7 +527,19 @@
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', 'M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z');
     svg.appendChild(path); btn.appendChild(svg);
-    btn.appendChild(document.createTextNode('felt this' + (n > 0 ? ' · ' + n : '')));
+    btn.appendChild(document.createTextNode('felt this'));
+  }
+  // weekly total ("47 times this week, someone felt seen"), shown once it reaches 5
+  function setTotal(root, n) {
+    let t = root.querySelector('.felt-total');
+    if (n < 5) { if (t) t.hidden = true; return; }
+    if (!t) {
+      t = document.createElement('p'); t.className = 'felt-total';
+      const first = root.querySelector('.post');
+      root.insertBefore(t, first);
+    }
+    t.hidden = false;
+    t.innerHTML = '<span aria-hidden="true">♥</span>&nbsp; ' + n + (n === 1 ? ' time' : ' times') + ' this week, someone felt seen.';
   }
   async function hydrate(root) {
     const btns = [...root.querySelectorAll('button.heart')];
@@ -533,21 +548,21 @@
       const r = await fetch('/api/like?ids=' + encodeURIComponent(btns.map(x => x.dataset.id).join(',')));
       if (!r.ok) throw new Error('off');
       const data = await r.json();
+      let total = parseInt(data.total, 10) || 0;
+      setTotal(root, total);
       btns.forEach(btn => {
-        btn.dataset.n = String((data.counts || {})[btn.dataset.id] || 0);
         paint(btn); btn.hidden = false; btn.closest('.foot').hidden = false;
         btn.addEventListener('click', async () => {
           const set = likedSet(), id = btn.dataset.id, was = set.has(id);
-          const before = parseInt(btn.dataset.n, 10) || 0;
           if (was) set.delete(id); else set.add(id);
-          saveLiked(set); btn.dataset.n = String(Math.max(0, before + (was ? -1 : 1))); paint(btn);
+          saveLiked(set); paint(btn);
+          total = Math.max(0, total + (was ? -1 : 1)); setTotal(root, total);
           try {
             const res = await fetch('/api/like', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, action: was ? 'unlike' : 'like' }) });
             if (!res.ok) throw new Error('bad');
-            const out = await res.json(); btn.dataset.n = String(out.count); paint(btn);
           } catch (e) {
-            const s2 = likedSet(); if (was) s2.add(id); else s2.delete(id); saveLiked(s2);
-            btn.dataset.n = String(before); paint(btn);
+            const s2 = likedSet(); if (was) s2.add(id); else s2.delete(id); saveLiked(s2); paint(btn);
+            total = Math.max(0, total + (was ? 1 : -1)); setTotal(root, total);
           }
         });
       });

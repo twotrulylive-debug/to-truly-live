@@ -1,7 +1,8 @@
-// "This stayed with me" counter for to truly live.
-// Runs on Vercel. Stores one number per answer in a free Upstash Redis database.
-// GET  /api/like?ids=w1-1,w1-2   -> { counts: { "w1-1": 3, "w1-2": 0 } }
-// POST /api/like  {id, action}   -> { count }   (action: "like" or "unlike")
+// "felt this" counter for to truly live.
+// Stores one number per answer in Upstash Redis. The public only ever sees the weekly TOTAL;
+// per-answer counts are shown only on the admin page.
+// GET  /api/like?ids=w1-a,w1-b   -> { total: 47 }
+// POST /api/like  {id, action}   -> { ok: true }   (action: "like" or "unlike")
 
 const URL_ = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
@@ -23,11 +24,11 @@ module.exports = async (req, res) => {
   try {
     if (req.method === 'GET') {
       const ids = String(req.query.ids || '').split(',').filter((x) => ID.test(x)).slice(0, 100);
-      if (!ids.length) return res.status(200).json({ counts: {} });
+      if (!ids.length) return res.status(200).json({ total: 0 });
       const vals = await redis(['MGET', ...ids.map((i) => 'like:' + i)]);
-      const counts = {};
-      ids.forEach((id, i) => { counts[id] = Math.max(0, parseInt(vals[i] || '0', 10) || 0); });
-      return res.status(200).json({ counts });
+      let total = 0;
+      ids.forEach((id, i) => { total += Math.max(0, parseInt(vals[i] || '0', 10) || 0); });
+      return res.status(200).json({ total });
     }
     if (req.method === 'POST') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
@@ -49,7 +50,7 @@ module.exports = async (req, res) => {
         v = await redis(['DECR', 'like:' + id]);
         if (v < 0) { await redis(['SET', 'like:' + id, 0]); v = 0; }
       }
-      return res.status(200).json({ count: v });
+      return res.status(200).json({ ok: true });
     }
     return res.status(405).json({ error: 'method not allowed' });
   } catch (e) {
