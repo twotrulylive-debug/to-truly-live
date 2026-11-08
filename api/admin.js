@@ -68,7 +68,8 @@ module.exports = async (req, res) => {
       subs.forEach((s, i) => { likes[s.id] = Math.max(0, parseInt(likeVals[i] || '0', 10) || 0); });
       const weeks = [{ week: site.week, label: site.label, prompt: site.prompt }]
         .concat(archive.map((a) => ({ week: a.week, label: a.label, prompt: a.prompt })));
-      return res.status(200).json({ likes, optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length, weeks });
+      const lastExport = (await L.redis(['GET', 'optins:lastExport'])) || '';
+      return res.status(200).json({ lastExport, likes, optins, site, closed: L.closedNow(site), subs, mod, contacts, archiveCount: archive.length, weeks });
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'method not allowed' });
 
@@ -119,6 +120,13 @@ module.exports = async (req, res) => {
       const next = { state: 'open', week: site.week + 1, label, prompt, note: L.clean(b.note, 400), nextOpens: 'Wednesday', openedAt: new Date().toISOString() };
       await L.setJSON('site', next);
       return res.status(200).json({ ok: true, site: next });
+    }
+
+    if (b.action === 'markexport') {
+      const at = L.clean(b.at, 40);
+      if (!at || isNaN(Date.parse(at))) return res.status(400).json({ error: 'bad time' });
+      await L.redis(['SET', 'optins:lastExport', at]);
+      return res.status(200).json({ ok: true, lastExport: at });
     }
 
     if (b.action === 'delcontact') {

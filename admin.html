@@ -168,7 +168,10 @@
         <h2>Weekly email sign-ups</h2>
         <p class="muted" id="optCount"></p>
         <p class="muted" style="margin-top:0.4rem">People who ticked "Also send me the weekly prompt". Download the list and import it in Substack (Subscribers, then Import). Keep the file: it's your record of their permission.</p>
-        <button class="btn" type="button" id="exportOpt">Download list (CSV)</button>
+        <p id="optNew" style="margin-top:0.75rem;font-weight:600;color:var(--cobalt)"></p>
+        <button class="btn cob" type="button" id="exportNew">Download new only</button>
+        <button class="btn alt" type="button" id="exportOpt">Download everyone (full backup)</button>
+        <p class="muted" style="margin-top:0.6rem">"New only" gives you everyone who signed up since your last "new only" download. The full backup never changes that.</p>
       </div>
     </div>
   </section>
@@ -227,6 +230,9 @@
 
     const seen = new Set(); const opt = (DATA.optins || []).filter(o => { const k = String(o.email).toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
     $('optCount').textContent = opt.length + (opt.length === 1 ? ' person' : ' people') + ' so far';
+    const newOnes = newOptins();
+    $('optNew').textContent = newOnes.length ? newOnes.length + ' new since your last download' : 'No new sign-ups since your last download';
+    $('exportNew').disabled = !newOnes.length;
     const ml = $('msgList'); ml.textContent = '';
     const msgs = DATA.contacts || [];
     if (!msgs.length) ml.appendChild(el('p', 'muted', 'No messages yet.'));
@@ -258,11 +264,28 @@
       $('loginStatus').textContent = err.status === 503 ? 'The admin isn\'t set up yet (database or password missing in Vercel).' : err.message === 'wrong password' ? 'That password isn\'t right.' : err.message;
     }
   });
-  $('exportOpt').addEventListener('click', () => {
-    const seen = new Set(); const rows = [['email', 'opted_in_at', 'week', 'consent']];
-    (DATA.optins || []).forEach(o => { const k = String(o.email).toLowerCase(); if (seen.has(k)) return; seen.add(k); rows.push([o.email, o.at, o.week, o.consent]); });
+  // first sign-up per email (keeps their original consent record)
+  function uniqueOptins() {
+    const seen = new Set(), out = [];
+    (DATA.optins || []).forEach(o => { const k = String(o.email).toLowerCase(); if (seen.has(k)) return; seen.add(k); out.push(o); });
+    return out;
+  }
+  function newOptins() {
+    const last = DATA.lastExport ? Date.parse(DATA.lastExport) : 0;
+    return uniqueOptins().filter(o => Date.parse(o.at) > last);
+  }
+  function downloadCsv(list, name) {
+    const rows = [['email', 'opted_in_at', 'week', 'consent']].concat(list.map(o => [o.email, o.at, o.week, o.consent]));
     const csv = rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'to-truly-live-signups.csv'; document.body.appendChild(a); a.click(); a.remove();
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  }
+  const stamp = () => new Date().toISOString().slice(0, 10);
+  $('exportOpt').addEventListener('click', () => downloadCsv(uniqueOptins(), 'to-truly-live-signups-all-' + stamp() + '.csv'));
+  $('exportNew').addEventListener('click', async () => {
+    const list = newOptins(); if (!list.length) return;
+    downloadCsv(list, 'to-truly-live-signups-new-' + stamp() + '.csv');
+    const latest = list.reduce((m, o) => (Date.parse(o.at) > Date.parse(m) ? o.at : m), list[0].at);
+    try { await api('POST', { action: 'markexport', at: latest }); await load(); } catch (e) { alert('Downloaded, but could not save the marker: ' + e.message); }
   });
   $('logout').addEventListener('click', () => { try { sessionStorage.removeItem('ttl_admin'); } catch (e) {} location.reload(); });
 
