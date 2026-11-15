@@ -94,6 +94,22 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, published: pub.length, site });
     }
 
+    // change the name shown on one of this week's answers (empty = Anonymous)
+    if (b.action === 'setname') {
+      const id = L.clean(b.id, 20), name = L.clean(b.name, 30);
+      const raw = (await L.redis(['LRANGE', 'subs:' + site.week, 0, -1])) || [];
+      let found = false;
+      for (let i = 0; i < raw.length; i++) {
+        let s; try { s = JSON.parse(raw[i]); } catch (e) { continue; }
+        if (s.id !== id) continue;
+        s.name = name; await L.redis(['LSET', 'subs:' + site.week, i, JSON.stringify(s)]); found = true; break;
+      }
+      if (!found) return res.status(404).json({ error: 'answer not found' });
+      const pub = await L.getJSON('pub:' + site.week, null);
+      if (pub) { pub.forEach((p) => { if (p.id === 'w' + site.week + '-' + id) p.name = name; }); await L.setJSON('pub:' + site.week, pub); }
+      return res.status(200).json({ ok: true });
+    }
+
     if (b.action === 'reopen') {
       site.state = 'open'; site.openedAt = new Date().toISOString(); await L.setJSON('site', site);
       return res.status(200).json({ ok: true, site });

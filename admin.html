@@ -211,7 +211,17 @@
     if (!subs.length) list.appendChild(el('p', 'muted', 'No answers yet.'));
     subs.forEach(a => {
       const row = el('div', 'ans');
-      row.appendChild(el('div', 'who', a.name || 'Anonymous'));
+      const who = el('div', 'who', a.name || 'Anonymous');
+      const nm = el('button', '', a.name ? 'make anonymous' : 'show a name'); nm.type = 'button';
+      nm.style.cssText = 'margin-left:0.6rem;border:0;background:none;font:inherit;font-size:0.82rem;font-weight:500;color:var(--cobalt);text-decoration:underline;cursor:pointer;padding:0';
+      nm.addEventListener('click', async () => {
+        let name = '';
+        if (!a.name) { name = (prompt('Name to show for this answer:') || '').trim(); if (!name) return; }
+        else if (!confirm('Show this answer as Anonymous?')) return;
+        try { await api('POST', { action: 'setname', id: a.id, name }); await load(); } catch (e) { alert(e.message); }
+      });
+      who.appendChild(nm);
+      row.appendChild(who);
       row.appendChild(el('div', 'meta', when(a.at) + (a.email ? ' · ' + a.email : '')));
       if (DATA.likes && DATA.likes[a.id]) { const lk = el('div', 'meta', '♥ ' + DATA.likes[a.id] + ' felt this'); lk.style.color = 'var(--cobalt)'; lk.style.fontWeight = '600'; row.appendChild(lk); }
       if (a.optin) { const tg = el('span', 'pill', 'wants the emails'); tg.style.cssText = 'margin-top:0.35rem;color:var(--cobalt)'; row.appendChild(tg); }
